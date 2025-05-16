@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración de Incubadora</title>
+  <link rel="stylesheet" href="config.css"> <!-- Asegúrate de que este archivo CSS esté enlazado correctamente -->
+</head>
+<body>
+
+  <div class="config-container">
+    <h2>Configuración de Incubadora</h2>
+
+    <form class="config-form">
+      <div class="form-group">
+        <label for="temp">Temperatura Deseada (°C)</label>
+        <input type="number" id="temp" name="temp" min="30" max="40" step="0.1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="humidity">Humedad Deseada (%)</label>
+        <input type="number" id="humidity" name="humidity" min="40" max="70" step="1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="duration">Duración de Incubación (días)</label>
+        <input type="number" id="duration" name="duration" min="1" max="30" required>
+      </div>
+
+      <div class="form-group toggle-group">
+        <label for="notifications">Notificaciones</label>
+        <label class="switch">
+          <input type="checkbox" id="notifications" name="notifications" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>      
+
+      <div class="form-group toggle-group">
+        <label for="manualControl">Modo Manual</label>
+        <label class="switch">
+          <input type="checkbox" id="manualControl" name="manualControl">
+          <span class="slider round"></span>
+        </label>
+      </div>      
+
+      <button type="submit" class="save-btn">Guardar Configuración</button>
+    </form>
+  </div>
+
+</body>
+</html>

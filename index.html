@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Incubadora IoT</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Incubadora IoT</h1>
+      <nav>
+        <a href="#">Dashboard</a>
+        <a href="#">Historial</a>
+        <a href="#">Alertas</a>
+        <a href="config.html">Configuración</a>
+      </nav>
+    </header>
+
+    <div class="connection-status online">Conectado</div>
+
+    <section class="incubator-status">
+      <h2>Estado Actual</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="label">Temperatura</div>
+          <div class="value">37.5°C</div>
+        </div>
+        <div class="card">
+          <div class="label">Humedad</div>
+          <div class="value">55%</div>
+        </div>
+        <div class="card">
+          <div class="label">Días restantes</div>
+          <div class="value">14</div>
+        </div>
+        <div class="card">
+          <div class="label">Estado</div>
+          <div class="status-active">Activa</div>
+        </div>
+      </div>
+
+      <button class="settings-btn">Configuración Manual</button>
+    </section>
+
+    <section class="activity">
+      <h3>Actividad Reciente</h3>
+      <ul>
+        <li><span class="time">08:00</span>Temperatura ajustada automáticamente</li>
+        <li><span class="time">07:45</span>Sensor de humedad calibrado</li>
+        <li><span class="time">07:30</span>Incubadora encendida</li>
+      </ul>
+    </section>
+
+    <section class="graph-section">
+      <h3>Gráfico de Temperatura</h3>
+      <canvas id="tempChart" width="400" height="200"></canvas>
+    </section>
+
+    <div class="alert warning">¡Temperatura fuera del rango seguro!</div>
+
+    <footer>
+      <p>Incubadora IoT v1.0 | Última actualización: 16/05/2025</p>
+    </footer>
+  </div>
+
+  <script>
+    // Gráfico de temperatura simulado
+    const ctx = document.getElementById('tempChart').getContext('2d');
+    const tempChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00'],
+        datasets: [{
+          label: 'Temperatura (°C)',
+          data: [37.1, 37.3, 37.4, 37.6, 37.5, 37.7, 37.5],
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
+          borderColor: '#3498db',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
