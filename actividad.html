@@ -9,13 +9,21 @@
 <body>
   <div class="container">
     <header class="header">
-      <h1>Incubadora IoT</h1>
-      <nav>
-        <a href="index.html">Dashboard</a>
-        <a href="actividad.html" class="active">Actividad</a>
-        <a href="config.html">Configuración</a>
-      </nav>
-    </header>
+        <h1>Incubadora IoT</h1>
+      
+        <!-- Botón hamburguesa -->
+        <div class="hamburger" onclick="toggleMenu()">
+          &#9776;
+        </div>
+      
+        <!-- Navegación -->
+        <nav id="navMenu">
+          <a href="index.html">Mis Incubadoras</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="actividad.html">Actividad</a>
+          <a href="config.html">Configuración</a>
+        </nav>
+      </header>
 
     <section class="activity">
       <h3>Actividad Reciente</h3>
@@ -31,6 +39,13 @@
     <footer>
       <p>Incubadora IoT v1.0 | Última actualización: 16/05/2025</p>
     </footer>
+
+<script>
+function toggleMenu() {
+    const nav = document.getElementById("navMenu");
+    nav.classList.toggle("show");
+  }
+</script>
   </div>
 </body>
 </html>

@@ -393,3 +393,44 @@ input:checked + .slider:before {
   color: #3498db;
   min-width: 60px;
 }
+/* === HAMBURGER MENU === */
+.hamburger {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #3498db;
+}
+
+/* Mostrar menú hamburguesa en pantallas pequeñas */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .header nav {
+    display: none;
+    flex-direction: column;
+    background-color: #ffffff;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .header nav a {
+    color: #3498db;
+    padding: 10px 0;
+  }
+
+  .header nav.show {
+    display: flex;
+  }
+
+  .header {
+    position: relative;
+  }
+}

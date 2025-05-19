@@ -9,7 +9,23 @@
 <body>
 
   <div class="config-container">
-    <h2>Configuración de Incubadora</h2>
+
+    <header class="header">
+      <h2>Configuración de Incubadora</h2>
+    
+      <!-- Botón hamburguesa -->
+      <div class="hamburger" onclick="toggleMenu()">
+        &#9776;
+      </div>
+    
+      <!-- Navegación -->
+      <nav id="navMenu">
+        <a href="index.html">Mis Incubadoras</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="actividad.html">Actividad</a>
+        <a href="config.html">Configuración</a>
+      </nav>
+    </header>
 
     <form class="config-form">
       
@@ -52,6 +68,13 @@
       <button type="submit" class="save-btn">Guardar Configuración</button>
     </form>
   </div>
+
+<script>
+  function toggleMenu() {
+    const nav = document.getElementById("navMenu");
+    nav.classList.toggle("show");
+  }
+</script>
 
 </body>
 </html>
