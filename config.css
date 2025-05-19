@@ -47,6 +47,26 @@
     font-weight: 500;
     color: #555;
   }
+
+  input[type="text"] {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border 0.3s, box-shadow 0.3s;
+    font-size: 15px;
+    color: #2c3e50;
+  }
+  
+  input[type="text"]::placeholder {
+    color: #999;
+    font-style: italic;
+  }
+  
+  input[type="text"]:focus {
+    border-color: #8e44ad;
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
+  }
   
   input[type="number"],
   select {
@@ -59,8 +79,8 @@
   
   input[type="number"]:focus,
   select:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: #8e44ad;
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
   }
   
   .toggle-group {

@@ -12,6 +12,12 @@
     <h2>Configuración de Incubadora</h2>
 
     <form class="config-form">
+      
+      <div class="form-group">
+        <label for="machineName">Nombre de la maquina</label>
+        <input type="text" id="machineName" name="machineName" placeholder="Ingresa el nombre para tu maquina" required>
+      </div>
+
       <div class="form-group">
         <label for="temp">Temperatura Deseada (°C)</label>
         <input type="number" id="temp" name="temp" min="30" max="40" step="0.1" required>

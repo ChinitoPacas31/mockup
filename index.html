@@ -13,7 +13,7 @@
       <h1>Incubadora IoT</h1>
       <nav>
         <a href="#">Dashboard</a>
-        <a href="#">Historial</a>
+        <a href="actividad.html">Actividad</a>
         <a href="#">Alertas</a>
         <a href="config.html">Configuración</a>
       </nav>
@@ -45,15 +45,6 @@
       <button class="settings-btn">Configuración Manual</button>
     </section>
 
-    <section class="activity">
-      <h3>Actividad Reciente</h3>
-      <ul>
-        <li><span class="time">08:00</span>Temperatura ajustada automáticamente</li>
-        <li><span class="time">07:45</span>Sensor de humedad calibrado</li>
-        <li><span class="time">07:30</span>Incubadora encendida</li>
-      </ul>
-    </section>
-
     <section class="graph-section">
       <h3>Gráfico de Temperatura</h3>
       <canvas id="tempChart" width="400" height="200"></canvas>
@@ -62,6 +53,40 @@
     <div class="alert warning">¡Temperatura fuera del rango seguro!</div>
 
     <footer>
+      <!-- MODAL TEMPERATURA -->
+<div id="modalTemp" class="modal">
+  <div class="modal-content">
+    <span class="close" data-close="modalTemp">&times;</span>
+    <h3>Modificar Temperatura</h3>
+    <input type="number" id="tempInput" placeholder="Nueva temperatura °C" />
+    <button class="save-modal-btn">Guardar</button>
+  </div>
+</div>
+
+<!-- MODAL HUMEDAD -->
+<div id="modalHumedad" class="modal">
+  <div class="modal-content">
+    <span class="close" data-close="modalHumedad">&times;</span>
+    <h3>Modificar Humedad</h3>
+    <input type="number" id="humedadInput" placeholder="Nueva humedad %" />
+    <button class="save-modal-btn">Guardar</button>
+  </div>
+</div>
+
+<!-- MODAL ESTADO -->
+<div id="modalEstado" class="modal">
+  <div class="modal-content">
+    <span class="close" data-close="modalEstado">&times;</span>
+    <h3>Modificar Estado</h3>
+    <label class="switch">
+      <input type="checkbox" id="estadoToggle" checked>
+      <span class="slider"></span>
+    </label>
+    <p id="estadoTexto" style="margin-top: 15px; font-weight: 500;">Estado: Activa</p>
+    <button class="save-modal-btn">Guardar</button>
+  </div>
+</div>
+
       <p>Incubadora IoT v1.0 | Última actualización: 16/05/2025</p>
     </footer>
   </div>
@@ -97,6 +122,63 @@
         }
       }
     });
+
+  // Mostrar modal al hacer clic en tarjetas
+  document.querySelectorAll('.card').forEach(card => {
+    const label = card.querySelector('.label')?.textContent;
+
+    if (label === 'Temperatura') {
+      card.addEventListener('click', () => {
+        document.getElementById('modalTemp').style.display = 'block';
+      });
+    }
+
+    if (label === 'Humedad') {
+      card.addEventListener('click', () => {
+        document.getElementById('modalHumedad').style.display = 'block';
+      });
+    }
+  });
+
+  // Cerrar modales
+  document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', () => {
+      const modalId = closeBtn.getAttribute('data-close');
+      document.getElementById(modalId).style.display = 'none';
+    });
+  });
+
+  // Cerrar si se hace clic fuera del modal
+  window.addEventListener('click', function (e) {
+    document.querySelectorAll('.modal').forEach(modal => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  });
+
+  // Mostrar el modal de estado al hacer clic en la tarjeta
+document.querySelectorAll('.card').forEach(card => {
+  const label = card.querySelector('.label')?.textContent;
+
+  if (label === 'Estado') {
+    card.addEventListener('click', () => {
+      document.getElementById('modalEstado').style.display = 'block';
+    });
+  }
+});
+
+// Actualizar texto del estado según el switch
+const estadoToggle = document.getElementById('estadoToggle');
+const estadoTexto = document.getElementById('estadoTexto');
+
+estadoToggle.addEventListener('change', () => {
+  estadoTexto.textContent = estadoToggle.checked ? 'Estado: Activa' : 'Estado: Inactiva';
+});
+
+
   </script>
+
+  
 </body>
 </html>
