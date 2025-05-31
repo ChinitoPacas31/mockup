@@ -1,4 +1,3 @@
-/* === BASE STYLES === */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -164,7 +163,7 @@ body {
   text-align: center;
 }
 
-/* === FOOTER === */
+/* Footer */
 footer {
   margin-top: 30px;
   text-align: center;
@@ -172,21 +171,20 @@ footer {
   color: #888;
 }
 
-/* === CONNECTION STATUS === */
+/* Connection Status */
 .connection-status,
 .status-active {
   display: inline-block;
-  min-width: 80px; /* fuerza un ancho mínimo para uniformidad */
+  min-width: 80px;
   text-align: center;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
-  background-color: #ccc; /* color por defecto, se sobrescribe */
+  background-color: #ccc;
   color: white;
 }
 
-/* Estados específicos */
 .connection-status.online,
 .status-active {
   background-color: #2ecc71;
@@ -197,7 +195,7 @@ footer {
 }
 
 
-/* === ANIMATIONS === */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -218,7 +216,7 @@ footer {
   50% { transform: scale(1.05); }
 }
 
-/* === RESPONSIVE === */
+/* Responsive */
 @media (max-width: 400px) {
   body {
     padding: 10px;
@@ -250,7 +248,7 @@ footer {
     margin-top: 10px;
   }
 }
-/* === MODALES === */
+/* Modals */
 .modal {
   display: none;
   position: fixed;
@@ -385,7 +383,7 @@ input:checked + .slider:before {
   font-size: 16px;
   color: #555;
   display: flex;
-  justify-content: space-between; /* <-- esta línea alinea a izquierda y derecha */
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -398,7 +396,7 @@ input:checked + .slider:before {
   color: #3498db;
   min-width: 60px;
 }
-/* === HAMBURGER MENU === */
+/* Hamburger Menu */
 .hamburger {
   display: none;
   font-size: 28px;
@@ -406,7 +404,6 @@ input:checked + .slider:before {
   color: #3498db;
 }
 
-/* Mostrar menú hamburguesa en pantallas pequeñas */
 @media (max-width: 768px) {
   .hamburger {
     display: block;

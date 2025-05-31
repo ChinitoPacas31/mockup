@@ -61,7 +61,7 @@
     <div class="alert warning">¡Temperatura fuera del rango seguro!</div>
 
     <footer>
-      <!-- MODAL TEMPERATURA -->
+      <!-- Modal Temperatura -->
 <div id="modalTemp" class="modal">
   <div class="modal-content">
     <span class="close" data-close="modalTemp">&times;</span>
@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<!-- MODAL HUMEDAD -->
+<!-- Modal Humedad -->
 <div id="modalHumedad" class="modal">
   <div class="modal-content">
     <span class="close" data-close="modalHumedad">&times;</span>
@@ -81,7 +81,7 @@
   </div>
 </div>
 
-<!-- MODAL ESTADO -->
+<!-- Modal Estado -->
 <div id="modalEstado" class="modal">
   <div class="modal-content">
     <span class="close" data-close="modalEstado">&times;</span>
@@ -100,7 +100,6 @@
   </div>
 
   <script>
-    // Gráfico de temperatura simulado
     const ctx = document.getElementById('tempChart').getContext('2d');
     const tempChart = new Chart(ctx, {
       type: 'line',
@@ -131,7 +130,6 @@
       }
     });
 
-  // Mostrar modal al hacer clic en tarjetas
   document.querySelectorAll('.card').forEach(card => {
     const label = card.querySelector('.label')?.textContent;
 
@@ -148,7 +146,6 @@
     }
   });
 
-  // Cerrar modales
   document.querySelectorAll('.close').forEach(closeBtn => {
     closeBtn.addEventListener('click', () => {
       const modalId = closeBtn.getAttribute('data-close');
@@ -156,7 +153,6 @@
     });
   });
 
-  // Cerrar si se hace clic fuera del modal
   window.addEventListener('click', function (e) {
     document.querySelectorAll('.modal').forEach(modal => {
       if (e.target === modal) {
@@ -165,7 +161,6 @@
     });
   });
 
-  // Mostrar el modal de estado al hacer clic en la tarjeta
 document.querySelectorAll('.card').forEach(card => {
   const label = card.querySelector('.label')?.textContent;
 
@@ -176,7 +171,6 @@ document.querySelectorAll('.card').forEach(card => {
   }
 });
 
-// Actualizar texto del estado según el switch
 const estadoToggle = document.getElementById('estadoToggle');
 const estadoTexto = document.getElementById('estadoTexto');
 
@@ -189,7 +183,5 @@ estadoToggle.addEventListener('change', () => {
     nav.classList.toggle("show");
   }
   </script>
-
-  
 </body>
 </html>

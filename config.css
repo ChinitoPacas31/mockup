@@ -1,4 +1,3 @@
-/* === CONFIGURACIÓN CONTAINER === */
 .config-container {
     max-width: 800px;
     margin: auto;
@@ -16,8 +15,7 @@
         color: #333;
         padding: 20px;
   }
-  
-  /* === HEADER === */
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -39,8 +37,7 @@
     cursor: pointer;
     color: #3498db;
   }
-  
-  /* NAV MENU */
+
   .header nav {
     display: flex;
     gap: 15px;
@@ -57,8 +54,7 @@
   .header nav a:hover {
     color: #2c3e50;
   }
-  
-  /* === FORM STYLING === */
+
   .config-form {
     display: flex;
     flex-direction: column;
@@ -89,15 +85,13 @@
   .form-group input:focus {
     border-color: #3498db;
   }
-  
-  /* TOGGLE GROUP */
+
   .toggle-group {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
-  
-  /* SAVE BUTTON */
+
   .save-btn {
     background-color: #3498db;
     color: white;
@@ -114,7 +108,6 @@
     background-color: #2980b9;
   }
   
-  /* === SWITCH STYLES (ya están definidos, por si no estaban los incluyo) === */
   .switch {
     position: relative;
     display: inline-block;
@@ -158,7 +151,6 @@
     transform: translateX(22px);
   }
   
-  /* === HAMBURGER MENU === */
   @media (max-width: 768px) {
     .hamburger {
       display: block;
@@ -187,7 +179,6 @@
     }
   }
   
-  /* === ANIMATIONS === */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
