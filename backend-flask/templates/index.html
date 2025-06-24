@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Completa de Incubación</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #5d78ff;
+      --secondary-color: #6c757d;
+      --accent-color: #ff7e5f;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Nuevos estilos para la barra de navegación */
+    .nav-bar {
+      background-color: rgb(255, 255, 255);
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-content {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .auth-btn {
+      padding: 8px 20px;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+
+    .login-btn {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+
+    .login-btn:hover {
+      background-color: rgba(93, 120, 255, 0.1);
+    }
+
+    .register-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: 1px solid var(--primary-color);
+    }
+
+    .register-btn:hover {
+      background-color: #4a6bff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(93, 120, 255, 0.3);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #6a11cb 100%);
+      color: white;
+      padding: 100px 0 80px;
+      text-align: center;
+      margin-bottom: -40px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 60px; /* Añadido para compensar la barra de navegación fija */
+    }
+
+    /* Resto de los estilos se mantienen igual */
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: 0;
+      right: 0;
+      height: 100px;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25' fill='%23f9f9f9'/%3E%3Cpath d='M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z' opacity='.5' fill='%23f9f9f9'/%3E%3Cpath d='M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z' fill='%23f9f9f9'/%3E%3C/svg%3E");
+      background-size: cover;
+      z-index: 1;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+      animation: fadeInDown 1s ease;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      opacity: 0.9;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .info-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 40px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 2;
+      transition: var(--transition);
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    h2 i {
+      margin-right: 15px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: var(--dark-color);
+      margin: 25px 0 15px;
+      font-size: 1.3rem;
+      border-left: 4px solid var(--accent-color);
+      padding-left: 15px;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    .highlight {
+      background-color: rgba(93, 120, 255, 0.1);
+      border-left: 4px solid var(--primary-color);
+      padding: 20px;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      margin: 25px 0;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 30px 0;
+    }
+
+    .feature-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      border-top: 3px solid var(--accent-color);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card h4 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .feature-card h4 i {
+      margin-right: 10px;
+      color: var(--accent-color);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin: 30px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    tr:hover {
+      background-color: rgba(93, 120, 255, 0.05);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 25px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-weight: 500;
+      margin-top: 20px;
+      transition: var(--transition);
+    }
+
+    .back-button:hover {
+      background-color: #4a6bff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(93, 120, 255, 0.3);
+    }
+
+    .back-button i {
+      margin-right: 8px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .info-card {
+        padding: 25px;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .nav-content {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra de navegación con botones de login/register -->
+  <div class="nav-bar">
+    <div class="container nav-content">
+      <a href="/login" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+      <a href="/registro" class="auth-btn register-btn"><i class="fas fa-user-plus"></i> Registrarse</a>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content container">
+      <h1><i class="fas fa-egg"></i> Guía Completa de Incubación</h1>
+      <p class="subtitle">Todo lo que necesitas saber sobre el proceso de incubación de huevos, parámetros óptimos y mejores prácticas para lograr los mejores resultados.</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="info-card">
+      <h2><i class="fas fa-book-open"></i> Introducción a la Incubación</h2>
+      <p>La incubación de huevos es un proceso fascinante que requiere atención a los detalles y condiciones ambientales precisas. Esta guía te proporcionará toda la información necesaria para entender y manejar adecuadamente el proceso de incubación, ya sea que estés trabajando con huevos de gallina, pato, codorniz u otras aves.</p>
+      
+      <div class="highlight">
+        <p><strong>¿Sabías que?</strong> La incubación artificial permite controlar con precisión todos los parámetros del proceso, logrando tasas de eclosión hasta un 20% mayores que en condiciones naturales cuando se realiza correctamente.</p>
+      </div>
+    </div>
+
+    <!-- Resto del contenido se mantiene igual -->
+    <div class="info-card">
+      <h2><i class="fas fa-sliders-h"></i> Parámetros Clave de Incubación</h2>
+      <p>Para lograr una incubación exitosa, es fundamental controlar tres parámetros principales:</p>
+      
+      <div class="grid-container">
+        <div class="feature-card">
+          <h4><i class="fas fa-thermometer-half"></i> Temperatura</h4>
+          <p>La temperatura ideal varía según la especie, pero generalmente se mantiene entre 37.2°C y 38.5°C. Fluctuaciones mayores a ±0.5°C pueden afectar negativamente el desarrollo embrionario.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h4><i class="fas fa-tint"></i> Humedad</h4>
+          <p>La humedad relativa debe mantenerse entre 45-60% durante la incubación, aumentando a 65-75% en los últimos 3 días. Controlar la humedad evita la deshidratación del huevo.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h4><i class="fas fa-sync-alt"></i> Volteo</h4>
+          <p>Los huevos deben voltearse al menos 3-5 veces al día hasta 3 días antes de la eclosión. Esto previene que el embrión se adhiera a las membranas internas.</p>
+        </div>
+      </div>
+      
+      <h3>Tabla de Parámetros por Especie</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Especie</th>
+              <th>Temperatura (°C)</th>
+              <th>Humedad (%)</th>
+              <th>Días de Incubación</th>
+              <th>Volteos Diarios</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Gallina</td>
+              <td>37.5 - 37.8</td>
+              <td>50-60</td>
+              <td>21</td>
+              <td>3-5</td>
+            </tr>
+            <tr>
+              <td>Pato</td>
+              <td>37.5 - 37.8</td>
+              <td>55-65</td>
+              <td>28</td>
+              <td>3-5</td>
+            </tr>
+            <tr>
+              <td>Codorniz</td>
+              <td>37.5 - 37.8</td>
+              <td>50-60</td>
+              <td>17-18</td>
+              <td>3-5</td>
+            </tr>
+            <tr>
+              <td>Pavo</td>
+              <td>37.5 - 37.8</td>
+              <td>55-65</td>
+              <td>28</td>
+              <td>3-5</td>
+            </tr>
+            <tr>
+              <td>Ganso</td>
+              <td>37.5 - 37.8</td>
+              <td>55-65</td>
+              <td>28-34</td>
+              <td>3-5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h2><i class="fas fa-clipboard-check"></i> Proceso de Incubación Paso a Paso</h2>
+      
+      <h3>1. Preparación Inicial</h3>
+      <ul>
+        <li>Seleccionar huevos fértiles de buena calidad (tamaño uniforme, sin grietas)</li>
+        <li>Almacenar los huevos a 12-15°C y 75% humedad antes de incubar (máximo 7 días)</li>
+        <li>Limpiar y desinfectar la incubadora antes de su uso</li>
+        <li>Precalentar la incubadora 24 horas antes de colocar los huevos</li>
+      </ul>
+      
+      <h3>2. Durante la Incubación</h3>
+      <ol>
+        <li>Colocar los huevos en posición horizontal o con el extremo puntiagudo ligeramente hacia abajo</li>
+        <li>Mantener la temperatura y humedad constantes según la especie</li>
+        <li>Voltear los huevos regularmente (automático o manual)</li>
+        <li>Realizar ovoscopía (mirada al trasluz) a los 7 y 14 días para descartar huevos no fértiles</li>
+      </ol>
+      
+      <h3>3. Fase de Eclosión (Lockdown)</h3>
+      <div class="highlight">
+        <p><strong>Importante:</strong> Los últimos 3 días antes de la eclosión se deben dejar de voltear los huevos y aumentar la humedad al 65-75%. No abrir la incubadora durante este período crítico.</p>
+      </div>
+      <ul>
+        <li>Los pollitos comenzarán a picar la cáscara (piping) aproximadamente 24 horas antes de salir</li>
+        <li>No ayudar a los pollitos a salir a menos que hayan pasado 24 horas desde el primer pip</li>
+        <li>Dejar los pollitos en la incubadora hasta que estén completamente secos</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h2><i class="fas fa-exclamation-triangle"></i> Problemas Comunes y Soluciones</h2>
+      
+      <div class="grid-container">
+        <div class="feature-card">
+          <h4><i class="fas fa-times-circle"></i> Baja Eclosión</h4>
+          <p><strong>Causas:</strong> Temperatura/humedad incorrecta, volteo insuficiente, huevos viejos o mal almacenados.<br>
+          <strong>Solución:</strong> Verificar calibración de equipos, seguir protocolos de almacenamiento, usar huevos frescos.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h4><i class="fas fa-thermometer-exclamation"></i> Pollitos Débiles</h4>
+          <p><strong>Causas:</strong> Temperatura demasiado alta, humedad baja, mala ventilación.<br>
+          <strong>Solución:</strong> Asegurar ventilación adecuada, mantener parámetros estables, no abrir incubadora innecesariamente.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h4><i class="fas fa-clock"></i> Eclosión Tardía</h4>
+          <p><strong>Causas:</strong> Temperatura muy baja, huevos almacenados demasiado tiempo.<br>
+          <strong>Solución:</strong> Revisar calibración del termómetro, no almacenar huevos más de 7 días antes de incubar.</p>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="back-button"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+  </div>
+</body>
+</html>
