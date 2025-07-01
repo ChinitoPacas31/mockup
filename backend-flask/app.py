@@ -205,6 +205,40 @@ def registros_incubadora(id):
 
     return jsonify(registros)
 
+@app.route('/api/aves', methods=['GET'])
+def api_get_aves():
+    aves = list(aves_col.find({}, {"nombre": 1}))
+    return jsonify([{"_id": str(ave["_id"]), "nombre": ave["nombre"]} for ave in aves])
+
+@app.route('/api/incubadora/<incubadora_id>', methods=['GET'])
+def api_get_incubadora(incubadora_id):
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+    if not incubadora:
+        return jsonify({"error": "Incubadora no encontrada"}), 404
+    
+    ave = aves_col.find_one({"_id": incubadora.get("ave_id")})
+    return jsonify({
+        "_id": str(incubadora["_id"]),
+        "codigo": incubadora["codigo"],
+        "nombre": incubadora["nombre"],
+        "ubicacion": incubadora["ubicacion"],
+        "activa": incubadora.get("activa", True),
+        "tipo_ave": ave["nombre"] if ave else "Desconocido"
+    })
+
+@app.route('/api/incubadora/<incubadora_id>/registros', methods=['GET'])
+def api_get_registros(incubadora_id):
+    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fechaHora", 1)
+    
+    registros = []
+    for r in registros_cursor:
+        registros.append({
+            "fechaHora": r["fechaHora"].isoformat(),
+            "temperatura": r["temperatura"],
+            "humedad": r["humedad"]
+        })
+    
+    return jsonify(registros)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
