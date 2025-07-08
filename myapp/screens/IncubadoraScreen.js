@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function IncubadorasScreen({ route, navigation }) {
-  const { userId } = route.params; // Asegúrate que userId se pasa correctamente
+  const { userId } = route.params;
   const [incubadoras, setIncubadoras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const cargarIncubadoras = async () => {
     try {
-      const res = await axios.get(`http://192.168.1.144:5000/api/incubadoras/${userId}`);
+      const res = await axios.get(`http://10.100.0.71:5000/api/incubadoras/${userId}`);
       setIncubadoras(res.data);
     } catch (error) {
       console.error('Error cargando incubadoras:', error);
@@ -33,7 +34,8 @@ export default function IncubadorasScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4a90e2" />
+        <ActivityIndicator size="large" color="#4C51BF" />
+        <Text style={styles.loadingText}>Cargando incubadoras...</Text>
       </View>
     );
   }
@@ -43,32 +45,39 @@ export default function IncubadorasScreen({ route, navigation }) {
       style={styles.card}
       onPress={() => navigation.navigate('DetalleIncubadora', { 
         incubadoraId: item.id,
-        userId: userId // Pasamos también el userId por si es necesario
+        userId: userId
       })}
+      activeOpacity={0.8}
     >
       <View style={styles.cardHeader}>
-        <Ionicons name="egg" size={24} color="#4a90e2" />
+        <View style={styles.cardIconContainer}>
+          <Ionicons name="egg" size={20} color="#FFF" />
+        </View>
         <Text style={styles.nombre}>{item.nombre}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: item.activa ? '#4CAF50' : '#F44336' }]}>
-          <Text style={styles.statusText}>{item.activa ? 'Activa' : 'Inactiva'}</Text>
+        <View style={[styles.statusBadge, { backgroundColor: item.activa ? '#38A169' : '#E53E3E' }]}>
+          <Text style={styles.statusText}>{item.activa ? 'ACTIVA' : 'INACTIVA'}</Text>
         </View>
       </View>
       
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
-          <Ionicons name="barcode" size={16} color="#666" />
-          <Text style={styles.infoText}>Código: {item.codigo}</Text>
+          <Ionicons name="barcode-outline" size={16} color="#718096" />
+          <Text style={styles.infoText}>{item.codigo}</Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="location" size={16} color="#666" />
-          <Text style={styles.infoText}>Ubicación: {item.ubicacion}</Text>
+          <Ionicons name="location-outline" size={16} color="#718096" />
+          <Text style={styles.infoText}>{item.ubicacion}</Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="paw" size={16} color="#666" />
-          <Text style={styles.infoText}>Tipo de ave: {item.tipo_ave}</Text>
+          <Ionicons name="egg-outline" size={16} color="#718096" />
+          <Text style={styles.infoText}>{item.tipo_ave}</Text>
         </View>
+      </View>
+      
+      <View style={styles.cardFooter}>
+        <Text style={styles.moreInfo}>Ver detalles →</Text>
       </View>
     </TouchableOpacity>
   );
@@ -76,23 +85,30 @@ export default function IncubadorasScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Tus Incubadoras</Text>
+        <Text style={styles.title}>Mis Incubadoras</Text>
         <TouchableOpacity 
+          style={styles.addButton}
           onPress={() => navigation.navigate('AgregarIncubadora', { userId: userId })}
+          activeOpacity={0.7}
         >
-          <Ionicons name="add-circle" size={32} color="#4a90e2" />
+          <Ionicons name="add" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
       
       {incubadoras.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="egg-outline" size={100} color="#ccc" style={styles.emptyIcon} />
-          <Text style={styles.emptyText}>No tienes incubadoras registradas</Text>
+          <View style={styles.emptyIconContainer}>
+            <Ionicons name="egg-outline" size={60} color="#CBD5E0" />
+          </View>
+          <Text style={styles.emptyTitle}>No hay incubadoras</Text>
+          <Text style={styles.emptySubtitle}>Aún no has registrado ninguna incubadora</Text>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={styles.primaryButton}
             onPress={() => navigation.navigate('AgregarIncubadora', { userId: userId })}
+            activeOpacity={0.8}
           >
-            <Text style={styles.addButtonText}>Agregar Incubadora</Text>
+            <Ionicons name="add" size={20} color="#FFF" style={styles.buttonIcon} />
+            <Text style={styles.primaryButtonText}>Agregar Incubadora</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -105,9 +121,11 @@ export default function IncubadorasScreen({ route, navigation }) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#4a90e2']}
+              colors={['#4C51BF']}
+              tintColor="#4C51BF"
             />
           }
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>
@@ -117,74 +135,118 @@ export default function IncubadorasScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#718096',
+    fontSize: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2D3748',
+    fontFamily: 'Inter-Bold',
+  },
+  addButton: {
+    backgroundColor: '#4C51BF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#4C51BF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  cardIconContainer: {
+    backgroundColor: '#4C51BF',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   nombre: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
-    marginLeft: 10,
+    color: '#2D3748',
     flex: 1,
+    fontFamily: 'Inter-SemiBold',
   },
   statusBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+    alignSelf: 'flex-start',
   },
   statusText: {
-    color: '#fff',
+    color: '#FFF',
     fontSize: 12,
     fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
+    textTransform: 'uppercase',
   },
   cardBody: {
-    paddingLeft: 34,
+    paddingLeft: 44, // 32 (icon) + 12 (margin)
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   infoText: {
-    marginLeft: 8,
-    color: '#555',
+    marginLeft: 12,
+    color: '#4A5568',
     fontSize: 14,
+    fontFamily: 'Inter-Medium',
+  },
+  cardFooter: {
+    marginTop: 8,
+    alignItems: 'flex-end',
+  },
+  moreInfo: {
+    color: '#4C51BF',
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
   },
   emptyState: {
     flex: 1,
@@ -192,25 +254,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 100,
   },
-  emptyIcon: {
-    marginBottom: 20,
-    opacity: 0.5,
+  emptyIconContainer: {
+    backgroundColor: '#EDF2F7',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  addButton: {
-    backgroundColor: '#4a90e2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
+  emptyTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#2D3748',
+    marginBottom: 8,
+    fontFamily: 'Inter-Bold',
+  },
+  emptySubtitle: {
     fontSize: 16,
+    color: '#718096',
+    marginBottom: 24,
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+    maxWidth: '80%',
+  },
+  primaryButton: {
+    backgroundColor: '#4C51BF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#4C51BF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  primaryButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    marginLeft: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
   },
 });

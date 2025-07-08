@@ -26,7 +26,7 @@ export default function AgregarIncubadora({ navigation, route }) {
   useEffect(() => {
     const cargarAves = async () => {
       try {
-        const res = await axios.get('http://192.168.1.144:5000/api/aves');
+        const res = await axios.get('http://10.100.0.71:5000/api/aves');
         setAves(res.data);
       } catch (error) {
         console.error('Error cargando aves:', error);
@@ -51,7 +51,7 @@ export default function AgregarIncubadora({ navigation, route }) {
 
     setLoading(true);
     try {
-      await axios.post('http://192.168.1.144:5000/api/incubadoras', {
+      await axios.post('http://10.100.0.71:5000/api/incubadoras', {
         ...formData,
         user_id: userId,
         activa: true
@@ -69,47 +69,68 @@ export default function AgregarIncubadora({ navigation, route }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="#333" />
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="#4C51BF" />
         </TouchableOpacity>
         <Text style={styles.title}>Nueva Incubadora</Text>
-        <View style={{ width: 28 }} />
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Código de la incubadora</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ej: INC-001"
-          value={formData.codigo}
-          onChangeText={(text) => handleChange('codigo', text)}
-        />
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="add-circle-outline" size={24} color="#4C51BF" />
+          <Text style={styles.cardTitle}>Información Básica</Text>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Código de la incubadora</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: INC-001"
+            placeholderTextColor="#A0AEC0"
+            value={formData.codigo}
+            onChangeText={(text) => handleChange('codigo', text)}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Nombre descriptivo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Mi incubadora principal"
+            placeholderTextColor="#A0AEC0"
+            value={formData.nombre}
+            onChangeText={(text) => handleChange('nombre', text)}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Ubicación física</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Sala de incubación, Granja norte"
+            placeholderTextColor="#A0AEC0"
+            value={formData.ubicacion}
+            onChangeText={(text) => handleChange('ubicacion', text)}
+          />
+        </View>
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Nombre descriptivo</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ej: Mi incubadora principal"
-          value={formData.nombre}
-          onChangeText={(text) => handleChange('nombre', text)}
-        />
-      </View>
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="egg-outline" size={24} color="#4C51BF" />
+          <Text style={styles.cardTitle}>Tipo de Ave</Text>
+        </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Ubicación física</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ej: Sala de incubación, Granja norte"
-          value={formData.ubicacion}
-          onChangeText={(text) => handleChange('ubicacion', text)}
-        />
-      </View>
-
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Tipo de ave</Text>
         <View style={styles.selectContainer}>
           {aves.map(ave => (
             <TouchableOpacity
@@ -119,7 +140,14 @@ export default function AgregarIncubadora({ navigation, route }) {
                 formData.ave_id === ave._id && styles.aveOptionSelected
               ]}
               onPress={() => handleChange('ave_id', ave._id)}
+              activeOpacity={0.7}
             >
+              <Ionicons 
+                name="egg-outline" 
+                size={20} 
+                color={formData.ave_id === ave._id ? "#FFF" : "#4C51BF"} 
+                style={styles.aveIcon}
+              />
               <Text style={[
                 styles.aveOptionText,
                 formData.ave_id === ave._id && styles.aveOptionTextSelected
@@ -132,14 +160,18 @@ export default function AgregarIncubadora({ navigation, route }) {
       </View>
 
       <TouchableOpacity 
-        style={styles.submitButton} 
+        style={[styles.submitButton, loading && styles.submitButtonDisabled]} 
         onPress={handleSubmit}
         disabled={loading}
+        activeOpacity={0.8}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color="#FFF" />
         ) : (
-          <Text style={styles.submitButtonText}>Guardar Incubadora</Text>
+          <>
+            <Ionicons name="save-outline" size={20} color="#FFF" style={styles.buttonIcon} />
+            <Text style={styles.submitButtonText}>Guardar Incubadora</Text>
+          </>
         )}
       </TouchableOpacity>
     </ScrollView>
@@ -150,71 +182,129 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8FAFC',
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 24,
+  },
+  backButton: {
+    padding: 8,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2D3748',
+    textAlign: 'center',
+    flex: 1,
+  },
+  headerRightPlaceholder: {
+    width: 40,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF2F7',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2D3748',
+    marginLeft: 12,
   },
   formGroup: {
-    marginBottom: 20,
+    padding: 16,
+    paddingTop: 12,
+    paddingBottom: 0,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#444',
+    fontSize: 14,
+    color: '#718096',
     marginBottom: 8,
+    fontWeight: '500',
   },
   input: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 12,
     fontSize: 16,
+    color: '#2D3748',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E2E8F0',
   },
   selectContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 10,
+    padding: 16,
   },
   aveOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E2E8F0',
     marginRight: 10,
     marginBottom: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
   },
   aveOptionSelected: {
-    backgroundColor: '#4a90e2',
-    borderColor: '#4a90e2',
+    backgroundColor: '#4C51BF',
+    borderColor: '#4C51BF',
+  },
+  aveIcon: {
+    marginRight: 8,
   },
   aveOptionText: {
-    color: '#333',
+    color: '#4A5568',
+    fontSize: 14,
+    fontWeight: '500',
   },
   aveOptionTextSelected: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
   submitButton: {
-    backgroundColor: '#4a90e2',
-    padding: 16,
-    borderRadius: 10,
+    backgroundColor: '#4C51BF',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+    borderRadius: 12,
     marginTop: 20,
+    shadowColor: '#4C51BF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#A0AEC0',
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
   },
 });

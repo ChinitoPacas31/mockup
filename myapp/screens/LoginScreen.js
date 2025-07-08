@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
 
 export default function LoginScreen({ navigation }) {
@@ -12,14 +13,14 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     setMensaje('');
     try {
-      const res = await axios.post('http://192.168.1.144:5000/api/login', {
+      const res = await axios.post('http://10.100.0.71:5000/api/login', {
         email: email.trim(),
         password: password.trim(),
       });
 
       if (res.data.success) {
         setMensaje('Inicio de sesión exitoso');
-          navigation.navigate('Incubadoras', { userId: res.data.user_id });
+        navigation.navigate('Incubadoras', { userId: res.data.user_id });
       } else {
         setMensaje('Credenciales incorrectas');
       }
@@ -36,50 +37,89 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={styles.innerContainer}>
-        {/* Logo o imagen de la app */}
+<View style={styles.innerContainer}>
+  {/* Logo con temática de incubadoras */}
+  <Image
+    source={require('../assets/logo.png')} // Cambia 'logo.png' por el nombre real de tu imagen
+    style={styles.logoIcon}
+    resizeMode="contain"
+  />
         
-        <Text style={styles.title}>Bienvenido</Text>
-        <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
+        <Text style={styles.title}>IncuboTech</Text>
+        <Text style={styles.subtitle}>Control de Incubadoras</Text>
 
-        <TextInput
-          placeholder="Correo electrónico"
-          placeholderTextColor="#999"
-          onChangeText={setEmail}
-          value={email}
-          style={styles.input}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        <View style={styles.inputContainer}>
+          <Icon 
+            name="email" 
+            size={20} 
+            color="#718096" 
+            style={styles.inputIcon} 
+          />
+          <TextInput
+            placeholder="Correo electrónico"
+            placeholderTextColor="#A0AEC0"
+            onChangeText={setEmail}
+            value={email}
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
         
-        <TextInput
-          placeholder="Contraseña"
-          placeholderTextColor="#999"
-          onChangeText={setPassword}
-          value={password}
-          style={styles.input}
-          secureTextEntry
-        />
+        <View style={styles.inputContainer}>
+          <Icon 
+            name="lock" 
+            size={20} 
+            color="#718096" 
+            style={styles.inputIcon} 
+          />
+          <TextInput
+            placeholder="Contraseña"
+            placeholderTextColor="#A0AEC0"
+            onChangeText={setPassword}
+            value={password}
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
 
-        {mensaje ? <Text style={styles.messageText}>{mensaje}</Text> : null}
+        {mensaje ? (
+          <Text style={[
+            styles.messageText,
+            mensaje.includes('éxito') ? styles.successMessage : styles.errorMessage
+          ]}>
+            {mensaje}
+          </Text>
+        ) : null}
 
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, loading && styles.buttonDisabled]} 
           onPress={handleLogin}
           disabled={loading}
+          activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>
-            {loading ? 'Cargando...' : 'Iniciar sesión'}
-          </Text>
+          {loading ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Iniciar sesión</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={styles.forgotPassword}
           onPress={() => navigation.navigate('RecuperarContraseña')}
+          activeOpacity={0.6}
         >
           <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>¿No tienes una cuenta?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
+            <Text style={styles.footerLink}>Regístrate</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -88,48 +128,72 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8FAFC',
   },
   innerContainer: {
     flex: 1,
     justifyContent: 'center',
-    padding: 30,
+    paddingHorizontal: 30,
+    paddingBottom: 150,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    alignSelf: 'center',
-    marginBottom: 30,
-  },
+  logoIcon: {
+  alignSelf: 'center',
+  marginBottom: -20,
+  width: 280,   // Ajusta el ancho aquí
+  height: 280,  // Ajusta el alto aquí
+},
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: '#2D3748',
+    marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 30,
+    color: '#718096',
+    marginBottom: 40,
     textAlign: 'center',
   },
-  input: {
-    backgroundColor: '#fff',
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 20,
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-    fontSize: 16,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingLeft: 10,
+    fontSize: 16,
+    color: '#2D3748',
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   button: {
-    backgroundColor: '#4a90e2',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: '#4C51BF',
+    padding: 18,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#4C51BF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  buttonDisabled: {
+    backgroundColor: '#A0AEC0',
   },
   buttonText: {
     color: 'white',
@@ -141,13 +205,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   forgotPasswordText: {
-    color: '#4a90e2',
+    color: '#4C51BF',
     fontSize: 14,
   },
   messageText: {
-    color: '#e74c3c',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
     fontSize: 14,
+    padding: 10,
+    borderRadius: 8,
+  },
+  errorMessage: {
+    backgroundColor: '#FFF5F5',
+    color: '#E53E3E',
+    borderWidth: 1,
+    borderColor: '#FED7D7',
+  },
+  successMessage: {
+    backgroundColor: '#F0FFF4',
+    color: '#38A169',
+    borderWidth: 1,
+    borderColor: '#C6F6D5',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#718096',
+    fontSize: 14,
+    marginRight: 5,
+  },
+  footerLink: {
+    color: '#4C51BF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
 export default function DetalleIncubadora({ route, navigation }) {
-  const { incubadoraId, userId } = route.params; // Asegúrate de recibir userId
+  const { incubadoraId, userId } = route.params;
   const [incubadora, setIncubadora] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registros, setRegistros] = useState([]);
@@ -13,16 +13,13 @@ export default function DetalleIncubadora({ route, navigation }) {
   useEffect(() => {
     const cargarDetalles = async () => {
       try {
-        // Cambia la URL para que coincida con tu API Flask
-        const res = await axios.get(`http://192.168.1.144:5000/api/incubadora/${incubadoraId}`);
+        const res = await axios.get(`http://10.100.0.71:5000/api/incubadora/${incubadoraId}`);
         setIncubadora(res.data);
         
-        // Carga los registros si es necesario
-        const resRegistros = await axios.get(`http://192.168.1.144:5000/api/incubadora/${incubadoraId}/registros`);
+        const resRegistros = await axios.get(`http://10.100.0.71:5000/api/incubadora/${incubadoraId}/registros`);
         setRegistros(resRegistros.data);
       } catch (error) {
         console.error('Error cargando detalles:', error);
-        Alert.alert('Error', 'No se pudo cargar la información de la incubadora');
       } finally {
         setLoading(false);
       }
@@ -33,65 +30,109 @@ export default function DetalleIncubadora({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4a90e2" />
+        <ActivityIndicator size="large" color="#4C51BF" />
+        <Text style={styles.loadingText}>Cargando detalles...</Text>
       </View>
     );
   }
 
   if (!incubadora) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>No se encontró la incubadora</Text>
+      <View style={styles.errorContainer}>
+        <Ionicons name="warning-outline" size={60} color="#E53E3E" />
+        <Text style={styles.errorTitle}>No se encontró la incubadora</Text>
+        <Text style={styles.errorSubtitle}>La incubadora solicitada no está disponible</Text>
         <TouchableOpacity 
-          style={styles.retryButton}
+          style={styles.primaryButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.8}
         >
-          <Text style={styles.retryButtonText}>Volver</Text>
+          <Ionicons name="arrow-back" size={20} color="#FFF" style={styles.buttonIcon} />
+          <Text style={styles.primaryButtonText}>Volver atrás</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="#333" />
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="#4C51BF" />
         </TouchableOpacity>
         <Text style={styles.title}>{incubadora.nombre}</Text>
-        <View style={{ width: 28 }} />
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       <View style={styles.card}>
-        <View style={styles.infoRow}>
-          <Ionicons name="barcode" size={20} color="#666" />
-          <Text style={styles.infoText}>Código: {incubadora.codigo}</Text>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="egg" size={20} color="#FFF" />
+          </View>
+          <Text style={styles.cardTitle}>Información General</Text>
         </View>
 
-        <View style={styles.infoRow}>
-          <Ionicons name="location" size={20} color="#666" />
-          <Text style={styles.infoText}>Ubicación: {incubadora.ubicacion}</Text>
-        </View>
+        <View style={styles.infoContainer}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="barcode-outline" size={18} color="#4C51BF" />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Código</Text>
+              <Text style={styles.infoValue}>{incubadora.codigo}</Text>
+            </View>
+          </View>
 
-        <View style={styles.infoRow}>
-          <Ionicons name="paw" size={20} color="#666" />
-          <Text style={styles.infoText}>Tipo de ave: {incubadora.tipo_ave}</Text>
-        </View>
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="location-outline" size={18} color="#4C51BF" />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Ubicación</Text>
+              <Text style={styles.infoValue}>{incubadora.ubicacion}</Text>
+            </View>
+          </View>
 
-        <View style={styles.infoRow}>
-          <Ionicons name="power" size={20} color="#666" />
-          <Text style={styles.infoText}>
-            Estado: 
-            <Text style={{ color: incubadora.activa ? '#4CAF50' : '#F44336' }}>
-              {incubadora.activa ? ' Activa' : ' Inactiva'}
-            </Text>
-          </Text>
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="egg-outline" size={18} color="#4C51BF" />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Tipo de ave</Text>
+              <Text style={styles.infoValue}>{incubadora.tipo_ave}</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="power-outline" size={18} color="#4C51BF" />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Estado</Text>
+              <Text style={[
+                styles.infoValue, 
+                styles.statusText,
+                incubadora.activa ? styles.statusActive : styles.statusInactive
+              ]}>
+                {incubadora.activa ? 'Activa' : 'Inactiva'}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 
       <TouchableOpacity 
         style={styles.toggleButton}
         onPress={() => setShowRegistros(!showRegistros)}
+        activeOpacity={0.7}
       >
         <Text style={styles.toggleButtonText}>
           {showRegistros ? 'Ocultar registros' : 'Mostrar registros'}
@@ -99,27 +140,44 @@ export default function DetalleIncubadora({ route, navigation }) {
         <Ionicons 
           name={showRegistros ? 'chevron-up' : 'chevron-down'} 
           size={20} 
-          color="#4a90e2" 
+          color="#4C51BF" 
         />
       </TouchableOpacity>
 
       {showRegistros && (
         <View style={styles.registrosContainer}>
-          <Text style={styles.sectionTitle}>Registros Recientes</Text>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="time-outline" size={20} color="#4C51BF" />
+            <Text style={styles.sectionTitle}>Registros Recientes</Text>
+          </View>
+
           {registros.length > 0 ? (
             registros.map((registro, index) => (
-              <View key={index} style={styles.registroItem}>
+              <View key={index} style={[
+                styles.registroItem,
+                index === 0 && styles.firstRegistroItem,
+                index === registros.length - 1 && styles.lastRegistroItem
+              ]}>
                 <Text style={styles.registroFecha}>
                   {new Date(registro.fechaHora).toLocaleString()}
                 </Text>
                 <View style={styles.registroData}>
-                  <Text style={styles.registroText}>Temp: {registro.temperatura}°C</Text>
-                  <Text style={styles.registroText}>Humedad: {registro.humedad}%</Text>
+                  <View style={styles.registroMetric}>
+                    <Ionicons name="thermometer-outline" size={16} color="#E53E3E" />
+                    <Text style={styles.registroText}>{registro.temperatura}°C</Text>
+                  </View>
+                  <View style={styles.registroMetric}>
+                    <Ionicons name="water-outline" size={16} color="#3182CE" />
+                    <Text style={styles.registroText}>{registro.humedad}%</Text>
+                  </View>
                 </View>
               </View>
             ))
           ) : (
-            <Text style={styles.emptyText}>No hay registros disponibles</Text>
+            <View style={styles.emptyState}>
+              <Ionicons name="document-text-outline" size={40} color="#CBD5E0" />
+              <Text style={styles.emptyText}>No hay registros disponibles</Text>
+            </View>
           )}
         </View>
       )}
@@ -130,108 +188,238 @@ export default function DetalleIncubadora({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-    padding: 20,
+    backgroundColor: '#F8FAFC',
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#718096',
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#F8FAFC',
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2D3748',
+    marginTop: 16,
+  },
+  errorSubtitle: {
+    fontSize: 16,
+    color: '#718096',
+    marginTop: 8,
+    marginBottom: 32,
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+  },
+  backButton: {
+    padding: 8,
   },
   title: {
-    fontSize: 22,
+    flex: 1,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2D3748',
+    textAlign: 'center',
+    marginHorizontal: 12,
+  },
+  headerRightPlaceholder: {
+    width: 40,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF2F7',
+  },
+  cardIcon: {
+    backgroundColor: '#4C51BF',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2D3748',
+  },
+  infoContainer: {
+    padding: 16,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
   },
-  infoText: {
-    marginLeft: 10,
+  infoIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EBF4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 2,
+  },
+  infoValue: {
     fontSize: 16,
-    color: '#555',
+    color: '#2D3748',
+    fontWeight: '500',
+  },
+  statusText: {
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  statusActive: {
+    color: '#38A169',
+  },
+  statusInactive: {
+    color: '#E53E3E',
   },
   toggleButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   toggleButtonText: {
     fontSize: 16,
-    color: '#4a90e2',
     fontWeight: '600',
+    color: '#4C51BF',
+  },
+  registrosContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF2F7',
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  registrosContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    fontWeight: '600',
+    color: '#2D3748',
+    marginLeft: 8,
   },
   registroItem: {
-    paddingVertical: 12,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#EDF2F7',
+  },
+  firstRegistroItem: {
+    borderTopWidth: 0,
+  },
+  lastRegistroItem: {
+    borderBottomWidth: 0,
   },
   registroFecha: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
+    color: '#718096',
+    marginBottom: 8,
   },
   registroData: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  registroMetric: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   registroText: {
     fontSize: 16,
-    color: '#333',
+    color: '#2D3748',
+    marginLeft: 8,
+  },
+  emptyState: {
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
+    fontSize: 16,
+    color: '#718096',
+    marginTop: 16,
     textAlign: 'center',
-    color: '#666',
-    marginVertical: 20,
   },
-  errorText: {
-    textAlign: 'center',
-    fontSize: 18,
-    color: '#F44336',
-    marginBottom: 20,
+  primaryButton: {
+    backgroundColor: '#4C51BF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#4C51BF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  retryButton: {
-    backgroundColor: '#4a90e2',
-    padding: 15,
-    borderRadius: 8,
-    alignSelf: 'center',
+  primaryButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
-  retryButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  buttonIcon: {
+    marginRight: 8,
   },
 });

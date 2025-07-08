@@ -10,7 +10,7 @@ export default function RegistroScreen({ navigation }) {
 
   const handleRegistro = async () => {
     try {
-      const res = await axios.post('http://192.168.1.144:5000/api/registro', {
+      const res = await axios.post('http://10.100.0.71:5000/api/registro', {
         nombre,
         email,
         password,
