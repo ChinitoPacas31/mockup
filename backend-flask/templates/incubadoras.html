@@ -49,10 +49,19 @@
       </ul>
     </div>
 
-    <div class="card pulse">
+    <div class="card pulse" id="formulario">
       <h2><i class="fas fa-plus-circle"></i> Agregar Nueva Incubadora</h2>
-      
-      <form method="POST" action="/incubadoras">
+      {% if error %}
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+      </div>
+    {% elif success %}
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> {{ success }}
+      </div>
+    {% endif %}
+
+      <form method="POST" action="/incubadoras#formulario">
         <div class="form-group">
           <label for="nombre"><i class="fas fa-tag"></i> Nombre:</label>
           <input type="text" id="nombre" name="nombre" required placeholder="Ej: Incubadora Principal" />
@@ -76,7 +85,7 @@
             {% endfor %}
           </select>
         </div>
-        
+
         <button type="submit" class="btn btn-primary">
           <i class="fas fa-plus"></i> Agregar Incubadora
         </button>

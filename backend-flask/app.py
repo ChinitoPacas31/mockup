@@ -17,6 +17,7 @@ usuarios_col = db.usuarios
 incubadoras_col = db.incubadoras
 aves_col = db.aves
 registros_col = db.registros
+codigos_col = db.codigos_validos
 
 # --- RUTAS API PARA APP MOVIL ---
 
@@ -78,12 +79,19 @@ def api_add_incubadora():
     data = request.json
     user_id = data.get("user_id")
     ave_id = data.get("ave_id")
+    codigo = data.get("codigo")
 
-    if not all([user_id, ave_id]):
+    if not all([user_id, ave_id, codigo]):
         return jsonify({"success": False, "message": "Datos incompletos"}), 400
 
+    # Validar código
+    codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
+    if not codigo_valido:
+        return jsonify({"success": False, "message": "Código inválido o ya usado"}), 400
+
+    # Insertar incubadora
     incubadoras_col.insert_one({
-        "codigo": data["codigo"],
+        "codigo": codigo,
         "nombre": data["nombre"],
         "ubicacion": data["ubicacion"],
         "activa": True,
@@ -91,7 +99,11 @@ def api_add_incubadora():
         "ave_id": ObjectId(ave_id)
     })
 
+    # Marcar código como usado
+    codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
+
     return jsonify({"success": True, "message": "Incubadora agregada"})
+
 
 # --- RUTAS WEB ---
 
@@ -158,19 +170,37 @@ def add_incubadora():
 
     data = request.form
     ave_id = data.get("ave_id")
+    codigo = data.get("codigo")
 
-    if not ave_id:
-        return "Tipo de ave es requerido", 400
+    if not ave_id or not codigo:
+        return render_template("incubadoras.html", error="Tipo de ave y código son requeridos")
 
+    # Validar código
+    codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
+    if not codigo_valido:
+        # Reenviar con mensaje de error
+        user_id = ObjectId(session["user_id"])
+        incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
+        aves = list(aves_col.find())
+        return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
+
+    # Insertar incubadora
     incubadoras_col.insert_one({
-        "codigo": data["codigo"],
+        "codigo": codigo,
         "nombre": data["nombre"],
         "ubicacion": data["ubicacion"],
         "activa": True,
         "usuario_id": ObjectId(session["user_id"]),
         "ave_id": ObjectId(ave_id)
     })
-    return redirect(url_for('home'))
+
+    codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
+
+    # Mostrar mensaje de éxito
+    user_id = ObjectId(session["user_id"])
+    incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
+    aves = list(aves_col.find())
+    return render_template("incubadoras.html", success="Incubadora agregada correctamente", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
 
 @app.route('/incubadora/<id>')
 def ver_incubadora(id):
