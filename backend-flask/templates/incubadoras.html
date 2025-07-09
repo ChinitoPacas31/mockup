@@ -22,13 +22,18 @@
     <div class="card">
       <h2><i class="fas fa-egg"></i> Mis Incubadoras</h2>
       
-      <ul class="incubadora-list">
+      <div class="search-bar">
+        <input type="text" id="buscador" placeholder="Buscar incubadora..." />
+        <i class="fas fa-search"></i>
+      </div>
+
+      <ul class="incubadora-list" id="lista-incubadoras">
         {% for i in incubadoras %}
           <li class="incubadora-item">
             <div class="incubadora-info">
               <a href="{{ url_for('ver_incubadora', id=i.id) }}" class="incubadora-name">
                 {{ i.nombre }} <i class="fas fa-chevron-right"></i>
-              </a>
+              </a>              
               <div class="incubadora-details">
                 <span><i class="fas fa-map-marker-alt"></i> {{ i.ubicacion }}</span>
                 <span><i class="fas fa-barcode"></i> {{ i.codigo }}</span>
@@ -47,6 +52,7 @@
           </div>
         {% endfor %}
       </ul>
+      <div id="paginacion" class="pagination-controls"></div>
     </div>
 
     <div class="card pulse" id="formulario">
@@ -101,6 +107,62 @@
         item.style.animationDelay = `${index * 0.1}s`;
       });
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const buscador = document.getElementById('buscador');
+    const items = document.querySelectorAll('.incubadora-item');
+
+    buscador.addEventListener('input', () => {
+      const valor = buscador.value.toLowerCase();
+
+      items.forEach(item => {
+        const nombre = item.querySelector('.incubadora-name').textContent.toLowerCase();
+        const ubicacion = item.querySelector('.incubadora-details span:nth-child(1)').textContent.toLowerCase();
+        const codigo = item.querySelector('.incubadora-details span:nth-child(2)').textContent.toLowerCase();
+
+        if (nombre.includes(valor) || ubicacion.includes(valor) || codigo.includes(valor)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = Array.from(document.querySelectorAll('.incubadora-item'));
+    const paginacion = document.getElementById('paginacion');
+    const porPagina = 5;
+    let paginaActual = 1;
+
+    function mostrarPagina(pagina) {
+      const inicio = (pagina - 1) * porPagina;
+      const fin = inicio + porPagina;
+
+      items.forEach((item, i) => {
+        item.style.display = (i >= inicio && i < fin) ? 'block' : 'none';
+      });
+
+      generarBotones(Math.ceil(items.length / porPagina), pagina);
+    }
+
+    function generarBotones(totalPaginas, activa) {
+      paginacion.innerHTML = '';
+
+      for (let i = 1; i <= totalPaginas; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.classList.toggle('active', i === activa);
+        btn.addEventListener('click', () => {
+          paginaActual = i;
+          mostrarPagina(i);
+        });
+        paginacion.appendChild(btn);
+      }
+    }
+
+    mostrarPagina(paginaActual);
+  });
   </script>
 </body>
 </html>

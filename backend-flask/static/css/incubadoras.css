@@ -238,6 +238,46 @@
     box-shadow: 0 0 0 3px rgba(93, 120, 255, 0.2);
   }
 
+  .search-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 10px 40px 10px 16px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    outline: none;
+  }
+  .search-bar i {
+    position: absolute;
+    right: 16px;
+    color: #aaa;
+  }  
+
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .pagination-controls button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #4C51BF;
+    color: white;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .pagination-controls button.active {
+    background-color: #2B6CB0;
+  }  
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
