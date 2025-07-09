@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function HomeScreen({ route }) {
   const { user_id, nombre } = route.params;
@@ -10,7 +11,7 @@ export default function HomeScreen({ route }) {
   useEffect(() => {
     const fetchIncubadoras = async () => {
       try {
-        const res = await axios.get(`http://10.100.0.71:5000/api/incubadoras/${user_id}`);
+        const res = await axios.get(`${API_BASE_URL}/api/incubadoras/${user_id}`);
         setIncubadoras(res.data);
       } catch (error) {
         console.error('Error al obtener incubadoras:', error);

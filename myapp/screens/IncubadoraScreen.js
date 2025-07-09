@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import API_BASE_URL from '../config';
 
 export default function IncubadorasScreen({ route, navigation }) {
   const { userId } = route.params;
@@ -12,7 +13,7 @@ export default function IncubadorasScreen({ route, navigation }) {
 
   const cargarIncubadoras = async () => {
     try {
-      const res = await axios.get(`http://10.100.0.71:5000/api/incubadoras/${userId}`);
+      const res = await axios.get(`${API_BASE_URL}/api/incubadoras/${userId}`);
       setIncubadoras(res.data);
     } catch (error) {
       console.error('Error cargando incubadoras:', error);

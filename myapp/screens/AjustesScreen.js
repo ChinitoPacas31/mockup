@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import API_BASE_URL from '../config';
 
 export default function AjustesScreen() {
   return (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function RegistroScreen({ navigation }) {
   const [nombre, setNombre] = useState('');
@@ -10,7 +11,7 @@ export default function RegistroScreen({ navigation }) {
 
   const handleRegistro = async () => {
     try {
-      const res = await axios.post('http://10.100.0.71:5000/api/registro', {
+      const res = await axios.post(`${API_BASE_URL}/api/registro`, {
         nombre,
         email,
         password,

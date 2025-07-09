@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function AgregarIncubadora({ navigation, route }) {
   const { userId } = route.params;
@@ -26,7 +27,7 @@ export default function AgregarIncubadora({ navigation, route }) {
   useEffect(() => {
     const cargarAves = async () => {
       try {
-        const res = await axios.get('http://10.100.0.71:5000/api/aves');
+        const res = await axios.get(`${API_BASE_URL}/api/aves`);
         setAves(res.data);
       } catch (error) {
         console.error('Error cargando aves:', error);
@@ -48,21 +49,24 @@ export default function AgregarIncubadora({ navigation, route }) {
       Alert.alert('Error', 'Todos los campos son obligatorios');
       return;
     }
-
+  
     setLoading(true);
     try {
-      await axios.post('http://10.100.0.71:5000/api/incubadoras', {
+      await axios.post(`${API_BASE_URL}/api/incubadoras`, {
         ...formData,
         user_id: userId,
         activa: true
       });
-
+  
       Alert.alert('Éxito', 'Incubadora agregada correctamente', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      console.error('Error agregando incubadora:', error);
-      Alert.alert('Error', 'No se pudo agregar la incubadora');
+      if (error.response && error.response.data && error.response.data.message) {
+        Alert.alert('Error', error.response.data.message);
+      } else {
+        Alert.alert('Error', 'No se pudo agregar la incubadora');
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, Text } from 'react-native';
+import API_BASE_URL from '../config';
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {

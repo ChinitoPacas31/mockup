@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function DetalleIncubadora({ route, navigation }) {
   const { incubadoraId, userId } = route.params;
@@ -13,10 +14,10 @@ export default function DetalleIncubadora({ route, navigation }) {
   useEffect(() => {
     const cargarDetalles = async () => {
       try {
-        const res = await axios.get(`http://10.100.0.71:5000/api/incubadora/${incubadoraId}`);
+        const res = await axios.get(`${API_BASE_URL}/api/incubadora/${incubadoraId}`);
         setIncubadora(res.data);
         
-        const resRegistros = await axios.get(`http://10.100.0.71:5000/api/incubadora/${incubadoraId}/registros`);
+        const resRegistros = await axios.get(`${API_BASE_URL}/api/incubadora/${incubadoraId}/registros`);
         setRegistros(resRegistros.data);
       } catch (error) {
         console.error('Error cargando detalles:', error);

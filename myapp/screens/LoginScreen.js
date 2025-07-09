@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     setMensaje('');
     try {
-      const res = await axios.post('http://10.100.0.71:5000/api/login', {
+      const res = await axios.post(`${API_BASE_URL}/api/login`, {
         email: email.trim(),
         password: password.trim(),
       });
