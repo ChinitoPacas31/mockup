@@ -28,6 +28,7 @@
       </div>
 
       <ul class="incubadora-list" id="lista-incubadoras">
+        <div id="paginacion" class="pagination-controls"></div>
         {% for i in incubadoras %}
           <li class="incubadora-item">
             <div class="incubadora-info">
@@ -52,7 +53,6 @@
           </div>
         {% endfor %}
       </ul>
-      <div id="paginacion" class="pagination-controls"></div>
     </div>
 
     <div class="card pulse" id="formulario">
@@ -108,61 +108,59 @@
       });
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-    const buscador = document.getElementById('buscador');
-    const items = document.querySelectorAll('.incubadora-item');
+document.addEventListener('DOMContentLoaded', () => {
+  const buscador = document.getElementById('buscador');
+  const allItems = Array.from(document.querySelectorAll('.incubadora-item'));
+  const paginacion = document.getElementById('paginacion');
+  const porPagina = 4;
+  let paginaActual = 1;
+  let itemsFiltrados = [...allItems]; // Inicialmente, todos
 
-    buscador.addEventListener('input', () => {
-      const valor = buscador.value.toLowerCase();
+  function mostrarPagina(pagina) {
+    const inicio = (pagina - 1) * porPagina;
+    const fin = inicio + porPagina;
 
-      items.forEach(item => {
-        const nombre = item.querySelector('.incubadora-name').textContent.toLowerCase();
-        const ubicacion = item.querySelector('.incubadora-details span:nth-child(1)').textContent.toLowerCase();
-        const codigo = item.querySelector('.incubadora-details span:nth-child(2)').textContent.toLowerCase();
+    allItems.forEach(item => item.style.display = 'none');
 
-        if (nombre.includes(valor) || ubicacion.includes(valor) || codigo.includes(valor)) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
+    itemsFiltrados.slice(inicio, fin).forEach(item => {
+      item.style.display = 'block';
     });
-  });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const items = Array.from(document.querySelectorAll('.incubadora-item'));
-    const paginacion = document.getElementById('paginacion');
-    const porPagina = 5;
-    let paginaActual = 1;
+    generarBotones(Math.ceil(itemsFiltrados.length / porPagina), pagina);
+  }
 
-    function mostrarPagina(pagina) {
-      const inicio = (pagina - 1) * porPagina;
-      const fin = inicio + porPagina;
-
-      items.forEach((item, i) => {
-        item.style.display = (i >= inicio && i < fin) ? 'block' : 'none';
+  function generarBotones(totalPaginas, activa) {
+    paginacion.innerHTML = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.classList.toggle('active', i === activa);
+      btn.addEventListener('click', () => {
+        paginaActual = i;
+        mostrarPagina(i);
       });
-
-      generarBotones(Math.ceil(items.length / porPagina), pagina);
+      paginacion.appendChild(btn);
     }
+  }
 
-    function generarBotones(totalPaginas, activa) {
-      paginacion.innerHTML = '';
+  buscador.addEventListener('input', () => {
+    const valor = buscador.value.toLowerCase();
 
-      for (let i = 1; i <= totalPaginas; i++) {
-        const btn = document.createElement('button');
-        btn.textContent = i;
-        btn.classList.toggle('active', i === activa);
-        btn.addEventListener('click', () => {
-          paginaActual = i;
-          mostrarPagina(i);
-        });
-        paginacion.appendChild(btn);
-      }
-    }
+    itemsFiltrados = allItems.filter(item => {
+      const nombre = item.querySelector('.incubadora-name').textContent.toLowerCase();
+      const ubicacion = item.querySelector('.incubadora-details span:nth-child(1)').textContent.toLowerCase();
+      const codigo = item.querySelector('.incubadora-details span:nth-child(2)').textContent.toLowerCase();
 
+      return nombre.includes(valor) || ubicacion.includes(valor) || codigo.includes(valor);
+    });
+
+    paginaActual = 1;
     mostrarPagina(paginaActual);
   });
+
+  mostrarPagina(paginaActual);
+});
+
   </script>
 </body>
 </html>

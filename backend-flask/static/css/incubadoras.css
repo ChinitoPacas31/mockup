@@ -263,19 +263,20 @@
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
   }
   .pagination-controls button {
     padding: 8px 12px;
     border: none;
-    background-color: #4C51BF;
+    background-color: #5d78ff;
     color: white;
     font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
   }
   .pagination-controls button.active {
-    background-color: #2B6CB0;
+    background-color: #334393;
   }  
 
   @keyframes fadeIn {
