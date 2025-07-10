@@ -12,17 +12,29 @@
   <!-- Barra de navegación con botones de login/register -->
   <div class="nav-bar">
     <div class="container nav-content">
-      <a href="/login" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
-      <a href="/registro" class="auth-btn register-btn"><i class="fas fa-user-plus"></i> Registrarse</a>
+      <div class="textillo">
+        <h2>Nestium</h2> 
+      </div>
+      <div class="auth-links">
+        <a href="/login" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+        <a href="/registro" class="auth-btn register-btn"><i class="fas fa-user-plus"></i> Registrarse</a>
+      </div>
     </div>
   </div>
+  
 
-  <header>
-    <div class="header-content container">
-      <h1><i class="fas fa-egg"></i> Guía Completa de Incubación</h1>
-      <p class="subtitle">Todo lo que necesitas saber sobre el proceso de incubación de huevos, parámetros óptimos y mejores prácticas para lograr los mejores resultados.</p>
+<!-- Modificar el header existente (dentro del body) -->
+<header>
+  <div class="header-content container">
+    <h1><i class="fas fa-egg"></i> Guía Completa de Incubación</h1>
+    <p class="subtitle">Todo lo que necesitas saber sobre el proceso de incubación de huevos, parámetros óptimos y mejores prácticas para lograr los mejores resultados.</p>
+    <div class="header-buttons">
+      <a href="#parametros" class="header-btn"><i class="fas fa-sliders-h"></i> Parámetros</a>
+      <a href="#proceso" class="header-btn"><i class="fas fa-clipboard-check"></i> Proceso</a>
+      <a href="#problemas" class="header-btn"><i class="fas fa-exclamation-triangle"></i> Soluciones</a>
     </div>
-  </header>
+  </div>
+</header>
 
   <div class="container">
     <div class="info-card">
@@ -165,5 +177,35 @@
 
     <a href="#" class="back-button"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
   </div>
+<!-- Agregar esto antes del </body> -->
+<footer>
+  <div class="footer-content container">
+    <div class="footer-section">
+      <h3><i class="fas fa-egg"></i> Incubación Guiada</h3>
+      <p>La mejor fuente de información para lograr incubaciones exitosas.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Enlaces útiles</h4>
+      <ul>
+        <li><a href="#"><i class="fas fa-chevron-right"></i> Inicio</a></li>
+        <li><a href="#parametros"><i class="fas fa-chevron-right"></i> Parámetros</a></li>
+        <li><a href="#proceso"><i class="fas fa-chevron-right"></i> Proceso</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h4>Contacto</h4>
+      <p><i class="fas fa-envelope"></i> contacto@incubacionguiada.com</p>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2023 Guía Completa de Incubación. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
 </body>
 </html>
