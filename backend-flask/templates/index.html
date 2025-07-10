@@ -15,9 +15,14 @@
       <div class="textillo">
         <h2>Nestium</h2> 
       </div>
+      <!-- Solo muestra "Perfil" si el usuario está logueado -->
       <div class="auth-links">
-        <a href="/login" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
-        <a href="/registro" class="auth-btn register-btn"><i class="fas fa-user-plus"></i> Registrarse</a>
+        {% if session.user_id %}
+          <a href="/logout" class="auth-btn login-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        {% else %}
+          <a href="/login" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+          <a href="/registro" class="auth-btn register-btn"><i class="fas fa-user-plus"></i> Registrarse</a>
+        {% endif %}
       </div>
     </div>
   </div>

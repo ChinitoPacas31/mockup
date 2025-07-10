@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Perfil</title>
+  <link rel="stylesheet" href="/static/css/perfil.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="profile-header">
+    <div class="container header-content">
+      <div class="profile-header-content">
+        <h1><i class="fas fa-user-circle"></i> Mi Perfil</h1>
+        <p class="profile-welcome">Bienvenido a tu espacio personal</p>
+      </div>
+      <div class="profile-actions">
+        <a href="{{ url_for('home') }}" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> Volver al inicio
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="profile-main">
+    <div class="container profile-container">
+      <div class="profile-card">
+        <div class="card-header">
+          <h2><i class="fas fa-id-card"></i> Información Personal</h2>
+        </div>
+        <div class="card-body">
+          <div class="profile-info-item">
+            <i class="fas fa-user-tag"></i>
+            <div>
+              <span class="info-label">Nombre:</span>
+              <span class="info-value">{{ nombre }}</span>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <span class="info-label">Email:</span>
+              <span class="info-value">{{ email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="card-header">
+          <h2><i class="fas fa-chart-line"></i> Resumen de Actividad</h2>
+        </div>
+        <div class="card-body">
+          <div class="profile-info-item">
+            <i class="fas fa-egg"></i>
+            <div>
+              <span class="info-label">Incubadoras registradas:</span>
+              <span class="info-value">{{ total_incubadoras }}</span>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <i class="fas fa-history"></i>
+            <div>
+              <span class="info-label">Última incubadora:</span>
+              <span class="info-value">{{ ultima_incubadora }}</span>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <i class="fas fa-calendar-alt"></i>
+            <div>
+              <span class="info-label">Miembro desde:</span>
+              <span class="info-value">{{ fecha_registro }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card" style="margin-top: 20px;">
+        <div class="card-header">
+          <h2><i class="fas fa-bolt"></i> Acceso rápido</h2>
+        </div>
+        <div class="card-body" style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <a href="/incubadoras" class="btn btn-primary">
+            <i class="fas fa-egg" aria-hidden="true"></i> Mis Incubadoras
+          </a>
+          <a href="/incubadoras#formulario" class="btn btn-secondary">
+            <i class="fas fa-plus-circle"></i> Agregar Incubadora
+          </a>
+          <a href="mailto:soporte@tusitio.com" class="btn btn-outline" target="_blank">
+            <i class="fas fa-headset" aria-hidden="true"></i> Soporte
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

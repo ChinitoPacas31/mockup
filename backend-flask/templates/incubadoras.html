@@ -12,9 +12,14 @@
   <header>
     <div class="container header-content">
       <h1>Bienvenido, {{ nombre }} <i class="fas fa-feather-alt"></i></h1>
-      <a href="{{ url_for('logout') }}" class="btn btn-danger">
-        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-      </a>
+      <div>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </a>
+        <a href="/perfil" class="btn btn-secondary">
+          <i class="fas fa-user"></i> Perfil
+        </a>
+      </div>
     </div>
   </header>
 
@@ -98,7 +103,6 @@
       </form>
     </div>
   </div>
-
   <script>
     // Efecto de carga suave para los elementos
     document.addEventListener('DOMContentLoaded', () => {

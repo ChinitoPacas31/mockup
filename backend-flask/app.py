@@ -140,6 +140,28 @@ def login_form():
             return render_template('login.html', error="Credenciales incorrectas")
     return render_template('login.html')
 
+
+@app.route('/perfil')
+def perfil():
+    if "user_id" not in session:
+        return redirect(url_for('login_form'))
+    user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
+    incubadoras = list(incubadoras_col.find({"usuario_id": ObjectId(session["user_id"])}))
+    total_incubadoras = len(incubadoras)
+    activas = sum(1 for i in incubadoras if i.get("activa", True))
+    inactivas = total_incubadoras - activas
+    # Si tienes registros de temperatura/humedad, calcula promedios aquí
+    return render_template(
+        'perfil.html',
+        nombre=user["nombre"],
+        email=user["email"],
+        total_incubadoras=total_incubadoras,
+        incubadoras_activas=activas,
+        incubadoras_inactivas=inactivas,
+        # promedio_temperatura=..., promedio_humedad=...
+    )
+
+
 @app.route('/registro', methods=['GET', 'POST'])
 def registro_form():
     if request.method == 'POST':
@@ -163,44 +185,56 @@ def logout():
     session.clear()
     return render_template('index.html')
 
-@app.route('/incubadoras', methods=['POST'])
-def add_incubadora():
-    if "user_id" not in session:
-        return redirect(url_for('login_form'))
+@app.route('/incubadoras', methods=['GET', 'POST'])
+def incubadoras():
+    if request.method == 'POST':
+        data = request.form
+        ave_id = data.get("ave_id")
+        codigo = data.get("codigo")
 
-    data = request.form
-    ave_id = data.get("ave_id")
-    codigo = data.get("codigo")
+        if not ave_id or not codigo:
+            return render_template("incubadoras.html", error="Tipo de ave y código son requeridos")
 
-    if not ave_id or not codigo:
-        return render_template("incubadoras.html", error="Tipo de ave y código son requeridos")
+        # Validar código
+        codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
+        if not codigo_valido:
+            # Reenviar con mensaje de error
+            user_id = ObjectId(session["user_id"])
+            incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
+            aves = list(aves_col.find())
+            return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
 
-    # Validar código
-    codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
-    if not codigo_valido:
-        # Reenviar con mensaje de error
+        # Insertar incubadora
+        incubadoras_col.insert_one({
+            "codigo": codigo,
+            "nombre": data["nombre"],
+            "ubicacion": data["ubicacion"],
+            "activa": True,
+            "usuario_id": ObjectId(session["user_id"]),
+            "ave_id": ObjectId(ave_id)
+        })
+
+        codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
+
+        # Mostrar mensaje de éxito
         user_id = ObjectId(session["user_id"])
         incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
         aves = list(aves_col.find())
-        return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
-
-    # Insertar incubadora
-    incubadoras_col.insert_one({
-        "codigo": codigo,
-        "nombre": data["nombre"],
-        "ubicacion": data["ubicacion"],
-        "activa": True,
-        "usuario_id": ObjectId(session["user_id"]),
-        "ave_id": ObjectId(ave_id)
-    })
-
-    codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
-
-    # Mostrar mensaje de éxito
+        return render_template("incubadoras.html", success="Incubadora agregada correctamente", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
     user_id = ObjectId(session["user_id"])
-    incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
+    incubadoras = []
+    for doc in incubadoras_col.find({"usuario_id": user_id}):
+        ave = aves_col.find_one({"_id": doc.get("ave_id")})
+        incubadoras.append({
+            "id": str(doc["_id"]),
+            "codigo": doc["codigo"],
+            "nombre": doc["nombre"],
+            "ubicacion": doc["ubicacion"],
+            "activa": doc.get("activa", True),
+            "tipo_ave": ave["nombre"] if ave else "Desconocido"
+        })
     aves = list(aves_col.find())
-    return render_template("incubadoras.html", success="Incubadora agregada correctamente", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
+    return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
 
 @app.route('/incubadora/<id>')
 def ver_incubadora(id):
@@ -268,6 +302,26 @@ def api_get_registros(incubadora_id):
             "humedad": r["humedad"]
         })
     
+    return jsonify(registros)
+
+@app.route('/perfil/registros')
+def perfil_registros():
+    if "user_id" not in session:
+        return jsonify([])
+
+    user_id = ObjectId(session["user_id"])
+    # Ejemplo: obtén los últimos registros de todas las incubadoras del usuario
+    registros = []
+    for inc in incubadoras_col.find({"usuario_id": user_id}):
+        for reg in registros_col.find({"incubadora_id": inc["_id"]}).sort("fechaHora", -1).limit(1):
+            registros.append({
+                "fechaHora": reg["fechaHora"].isoformat(),
+                "temperatura": reg.get("temperatura", 0),
+                "humedad": reg.get("humedad", 0),
+                "incubadora": inc["nombre"]
+            })
+    # Opcional: ordenar por fecha
+    registros.sort(key=lambda r: r["fechaHora"])
     return jsonify(registros)
 
 if __name__ == '__main__':
