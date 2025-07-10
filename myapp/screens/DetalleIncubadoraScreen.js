@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import API_BASE_URL from '../config';
+import { LineChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
 
 export default function DetalleIncubadora({ route, navigation }) {
   const { incubadoraId, userId } = route.params;
@@ -146,42 +148,54 @@ export default function DetalleIncubadora({ route, navigation }) {
       </TouchableOpacity>
 
       {showRegistros && (
-        <View style={styles.registrosContainer}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="time-outline" size={20} color="#4C51BF" />
-            <Text style={styles.sectionTitle}>Registros Recientes</Text>
-          </View>
+  <View style={styles.registrosContainer}>
+    <View style={styles.sectionHeader}>
+      <Ionicons name="time-outline" size={20} color="#4C51BF" />
+      <Text style={styles.sectionTitle}>Gráfica de Registros</Text>
+    </View>
 
-          {registros.length > 0 ? (
-            registros.map((registro, index) => (
-              <View key={index} style={[
-                styles.registroItem,
-                index === 0 && styles.firstRegistroItem,
-                index === registros.length - 1 && styles.lastRegistroItem
-              ]}>
-                <Text style={styles.registroFecha}>
-                  {new Date(registro.fechaHora).toLocaleString()}
-                </Text>
-                <View style={styles.registroData}>
-                  <View style={styles.registroMetric}>
-                    <Ionicons name="thermometer-outline" size={16} color="#E53E3E" />
-                    <Text style={styles.registroText}>{registro.temperatura}°C</Text>
-                  </View>
-                  <View style={styles.registroMetric}>
-                    <Ionicons name="water-outline" size={16} color="#3182CE" />
-                    <Text style={styles.registroText}>{registro.humedad}%</Text>
-                  </View>
-                </View>
-              </View>
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-text-outline" size={40} color="#CBD5E0" />
-              <Text style={styles.emptyText}>No hay registros disponibles</Text>
-            </View>
-          )}
-        </View>
-      )}
+    {registros.length > 0 ? (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <LineChart
+          data={{
+            labels: registros.map((r, i) => i % 2 === 0 ? new Date(r.fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''),
+            datasets: [
+              {
+                data: registros.map(r => r.temperatura),
+                color: () => '#E53E3E',
+                strokeWidth: 2,
+              },
+              {
+                data: registros.map(r => r.humedad),
+                color: () => '#3182CE',
+                strokeWidth: 2,
+              },
+            ],
+            legend: ['Temperatura (°C)', 'Humedad (%)'],
+          }}
+          width={Math.max(Dimensions.get('window').width - 40, registros.length * 60)}
+          height={220}
+          chartConfig={{
+            backgroundGradientFrom: '#FFF',
+            backgroundGradientTo: '#FFF',
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(76, 81, 191, ${opacity})`,
+            labelColor: () => '#718096',
+            style: { borderRadius: 16 },
+          }}
+          bezier
+          style={{ marginVertical: 8, borderRadius: 16 }}
+        />
+      </ScrollView>
+    ) : (
+      <View style={styles.emptyState}>
+        <Ionicons name="document-text-outline" size={40} color="#CBD5E0" />
+        <Text style={styles.emptyText}>No hay registros disponibles</Text>
+      </View>
+    )}
+  </View>
+)}
+
     </ScrollView>
   );
 }
