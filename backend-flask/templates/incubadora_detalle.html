@@ -61,10 +61,11 @@
           <div class="info-content">
             <h3>Estado</h3>
             <p>
-              <span class="status-badge {{ 'status-active' if incubadora.activa else 'status-inactive' }}">
+              <span id="estado-{{ incubadora._id }}" class="status-badge {{ 'status-active' if incubadora.activa else 'status-inactive' }}" onclick="toggleEstado('{{ incubadora._id }}')">
                 <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
                 {{ "Activa" if incubadora.activa else "Inactiva" }}
               </span>
+              
             </p>
           </div>
         </div>
@@ -120,127 +121,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const cards = document.querySelectorAll('.card');
-      cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.2}s`;
-      });
-
-      const ctx = document.getElementById('incubationChart').getContext('2d');
-
-      // Función para obtener registros desde backend
-      async function fetchRegistros() {
-        try {
-          const response = await fetch(`/incubadora/{{ incubadora._id }}/registros`);
-          if (!response.ok) throw new Error('Error al obtener registros');
-
-          const registros = await response.json();
-
-          // Extraer labels (hora) y datos
-          const labels = registros.map(r => {
-            const date = new Date(r.fechaHora);
-            // Obtener la hora y minutos en UTC, no local
-            const hours = date.getUTCHours().toString().padStart(2, '0');
-            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-            return `${hours}:${minutes}`;
-          });
-
-
-          const temperaturas = registros.map(r => r.temperatura);
-          const humedades = registros.map(r => r.humedad);
-
-          return { labels, temperaturas, humedades };
-        } catch (error) {
-          console.error(error);
-          return { labels: [], temperaturas: [], humedades: [] };
-        }
-      }
-
-      // Crear el gráfico dinámicamente
-      fetchRegistros().then(data => {
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: data.labels,
-            datasets: [
-              {
-                label: 'Temperatura (°C)',
-                data: data.temperaturas,
-                borderColor: '#e74c3c',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                tension: 0.3,
-                fill: true,
-                yAxisID: 'y',
-              },
-              {
-                label: 'Humedad (%)',
-                data: data.humedades,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.3,
-                fill: true,
-                yAxisID: 'y1',
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-              mode: 'index',
-              intersect: false,
-            },
-            plugins: {
-              legend: {
-                position: 'top',
-              },
-              tooltip: {
-                mode: 'index',
-                intersect: false,
-              }
-            },
-            scales: {
-              y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                min: 20,
-                max: 50,
-                title: {
-                  display: true,
-                  text: 'Temperatura (°C)'
-                }
-              },
-              y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                min: 0,
-                max: 100,
-                grid: {
-                  drawOnChartArea: false,
-                },
-                title: {
-                  display: true,
-                  text: 'Humedad (%)'
-                }
-              },
-              x: {
-                title: {
-                  display: true,
-                  text: 'Hora'
-                }
-              }
-            },
-            animation: {
-              duration: 1500,
-              easing: 'easeOutQuart'
-            }
-          }
-        });
-      });
-    });
-  </script>
+  <script src="{{ url_for('static', filename='js/incubadora_detalle.js') }}"></script>
 </body>
 </html>
