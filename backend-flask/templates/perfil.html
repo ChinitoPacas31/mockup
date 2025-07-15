@@ -27,6 +27,26 @@
 
   <main class="profile-main">
     <div class="container profile-container">
+      
+      <!-- Imagen de perfil -->
+      <div class="profile-card profile-image-card">
+        <div class="card-header">
+          <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
+        </div>
+        <div class="card-body" style="text-align: center;">
+          <img src="{{ url_for('static', filename=imagen_perfil) if imagen_perfil else url_for('static', filename='uploads/default.png') }}"
+          alt="perfil IMG"
+          class="profile-img"
+          style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px;">     
+          <div style="margin-top: 10px;">
+            <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-secondary">
+              <i class="fas fa-upload"></i> Cambiar imagen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información personal -->
       <div class="profile-card">
         <div class="card-header">
           <h2><i class="fas fa-id-card"></i> Información Personal</h2>
@@ -46,9 +66,15 @@
               <span class="info-value">{{ email }}</span>
             </div>
           </div>
+          <div style="margin-top: 15px;">
+            <a href="{{ url_for('editar_perfil') }}" class="btn btn-primary">
+              <i class="fas fa-edit"></i> Editar Perfil
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- Actividad -->
       <div class="profile-card">
         <div class="card-header">
           <h2><i class="fas fa-chart-line"></i> Resumen de Actividad</h2>
@@ -78,6 +104,7 @@
         </div>
       </div>
 
+      <!-- Acceso rápido -->
       <div class="profile-card" style="margin-top: 20px;">
         <div class="card-header">
           <h2><i class="fas fa-bolt"></i> Acceso rápido</h2>
@@ -94,6 +121,7 @@
           </a>
         </div>
       </div>
+
     </div>
   </main>
 </body>

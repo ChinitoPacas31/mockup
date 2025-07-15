@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cambiar Imagen de Perfil</title>
+  <link rel="stylesheet" href="/static/css/perfil.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="profile-header">
+    <div class="container header-content">
+      <div class="profile-header-content">
+        <h1><i class="fas fa-image"></i> Cambiar Imagen</h1>
+        <p class="profile-welcome">Actualiza tu foto de perfil</p>
+      </div>
+      <div class="profile-actions">
+        <a href="{{ url_for('perfil') }}" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> Cancelar
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="profile-main">
+    <div class="container profile-container">
+      <div class="profile-card">
+        <div class="card-header">
+          <h2><i class="fas fa-camera"></i> Subir nueva imagen</h2>
+        </div>
+        <div class="card-body">
+          {% if error %}
+            <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+          {% elif success %}
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ success }}</div>
+          {% endif %}
+
+          {% if imagen_url %}
+            <div class="profile-img-preview">
+              <img src="{{ imagen_url }}" alt="Imagen actual" class="img-actual">
+              <p>Imagen actual</p>
+            </div>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('cambiar_imagen') }}" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="imagen"><i class="fas fa-upload"></i> Selecciona una imagen:</label>
+              <input type="file" id="imagen" name="imagen" accept="image/*" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Guardar imagen
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -4,10 +4,17 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
 from datetime import datetime
+from werkzeug.utils import secure_filename
+from flask import flash
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 mongo_uri = "mongodb+srv://luisAdmin:1234@1stcluster.x5upfob.mongodb.net/?retryWrites=true&w=majority&appName=1stCluster"
 client = MongoClient(mongo_uri)
@@ -145,12 +152,15 @@ def login_form():
 def perfil():
     if "user_id" not in session:
         return redirect(url_for('login_form'))
+
     user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
+    imagen_perfil = user.get("imagen_perfil", None)  # por si no hay imagen aún
+
     incubadoras = list(incubadoras_col.find({"usuario_id": ObjectId(session["user_id"])}))
     total_incubadoras = len(incubadoras)
     activas = sum(1 for i in incubadoras if i.get("activa", True))
     inactivas = total_incubadoras - activas
-    # Si tienes registros de temperatura/humedad, calcula promedios aquí
+
     return render_template(
         'perfil.html',
         nombre=user["nombre"],
@@ -158,9 +168,94 @@ def perfil():
         total_incubadoras=total_incubadoras,
         incubadoras_activas=activas,
         incubadoras_inactivas=inactivas,
-        # promedio_temperatura=..., promedio_humedad=...
+        imagen_perfil=imagen_perfil
     )
 
+
+@app.route('/perfil/editar', methods=['GET', 'POST'])
+def editar_perfil():
+    if "user_id" not in session:
+        return redirect(url_for('login_form'))
+
+    user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
+
+    if request.method == 'POST':
+        nuevo_nombre = request.form.get('nombre')
+        nuevo_email = request.form.get('email')
+        nueva_password = request.form.get('password')
+
+        if not nuevo_nombre or not nuevo_email or not nueva_password:
+            flash("Todos los campos son obligatorios", "danger")
+            return render_template('editar_perfil.html', user=user)
+
+        usuarios_col.update_one(
+            {"_id": ObjectId(session["user_id"])},
+            {"$set": {"nombre": nuevo_nombre, "email": nuevo_email, "password": nueva_password}}
+        )
+        flash("Perfil actualizado correctamente", "success")
+        # Actualizamos los datos para volver a mostrar
+        user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
+        return render_template('editar_perfil.html', user=user)
+
+    return render_template('editar_perfil.html', user=user)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/perfil/imagen', methods=['GET', 'POST'])
+def cambiar_imagen():
+    if "user_id" not in session:
+        return redirect(url_for('login_form'))
+
+    user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
+
+    if request.method == 'POST':
+        print("Solicitud POST recibida")
+
+        if 'imagen' not in request.files:
+            print("⚠ No se recibió archivo")
+            flash('No se seleccionó ningún archivo', 'danger')
+            return redirect(request.url)
+        
+        archivo = request.files['imagen']
+        print(f"Nombre recibido: {archivo.filename}")
+
+        if archivo.filename == '':
+            print("⚠ Nombre de archivo vacío")
+            flash('Nombre de archivo vacío', 'danger')
+            return redirect(request.url)
+
+        if archivo and allowed_file(archivo.filename):
+            print("✅ Archivo válido")
+
+            filename = secure_filename(archivo.filename)
+            ruta_completa = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(f"Intentando guardar en: {ruta_completa}")
+
+            try:
+                archivo.save(ruta_completa)
+                print("✅ Archivo guardado correctamente")
+            except Exception as e:
+                print("❌ Error al guardar el archivo:", e)
+                flash("Ocurrió un error al guardar la imagen", "danger")
+                return redirect(request.url)
+
+            ruta_relativa = f"uploads/{filename}" 
+            print(f"Ruta guardada en DB: {ruta_relativa}")
+
+            usuarios_col.update_one(
+                {"_id": ObjectId(session["user_id"])},
+                {"$set": {"imagen_perfil": ruta_relativa}}
+            )
+
+            flash("Imagen de perfil actualizada", "success")
+            return redirect(url_for('perfil'))
+        else:
+            print("⚠ Formato no permitido")
+            flash("Formato de imagen no permitido", "danger")
+
+    return render_template('cambiar_imagen.html', user=user)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro_form():
