@@ -47,11 +47,12 @@
                   <i class="fas fa-{{ 'check-circle' if i.activa else 'times-circle' }}"></i> 
                   {{ "Activa" if i.activa else "Inactiva" }}
                 </span>
-                <button class="btn-incubadora-status" onclick="toggleIncubadora('{{ i.id }}')">
-                  {{ "Desactivar" if i.activa else "Activar" }}
-                </button>
+                
                 
               </div>
+              <button class="btn-incubadora-status" onclick="toggleIncubadora('{{ i.id }}')">
+                {{ "Desactivar" if i.activa else "Activar" }}
+              </button>
             </div>
           </li>
         {% else %}
