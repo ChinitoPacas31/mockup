@@ -324,5 +324,16 @@ def perfil_registros():
     registros.sort(key=lambda r: r["fechaHora"])
     return jsonify(registros)
 
+@app.route('/api/incubadora/<id>/toggle', methods=['POST'])
+def toggle_incubadora(id):
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
+    if not incubadora:
+        return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
+
+    nueva_activa = not incubadora.get("activa", True)
+    incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": {"activa": nueva_activa}})
+    
+    return jsonify({"success": True, "activa": nueva_activa})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

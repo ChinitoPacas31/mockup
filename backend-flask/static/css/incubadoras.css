@@ -169,6 +169,15 @@
     font-weight: 500;
   }
 
+  .btn-incubadora-status {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #5d78ff;
+    color: white;
+  }
+
   .status-active {
     background-color: rgba(46, 204, 113, 0.2);
     color: var(--success-color);
