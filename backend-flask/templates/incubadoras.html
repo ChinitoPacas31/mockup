@@ -43,16 +43,12 @@
               <div class="incubadora-details">
                 <span><i class="fas fa-map-marker-alt"></i> {{ i.ubicacion }}</span>
                 <span><i class="fas fa-barcode"></i> {{ i.codigo }}</span>
-                <span id="estado-{{ i.id }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}">
+                <span id="estado-{{ i.id }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" onclick="toggleIncubadora('{{ i.id }}')">
                   <i class="fas fa-{{ 'check-circle' if i.activa else 'times-circle' }}"></i> 
                   {{ "Activa" if i.activa else "Inactiva" }}
                 </span>
                 
-                
               </div>
-              <button class="btn-incubadora-status" onclick="toggleIncubadora('{{ i.id }}')">
-                {{ "Desactivar" if i.activa else "Activar" }}
-              </button>
             </div>
           </li>
         {% else %}
@@ -171,38 +167,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function toggleIncubadora(id) {
-    fetch(`/api/incubadora/${id}/toggle`, {
-      method: 'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const estadoEl = document.getElementById(`estado-${id}`);
-        const icon = estadoEl.querySelector('i');
-        const boton = estadoEl.nextElementSibling;
+  const estadoEl = document.getElementById(`estado-${id}`);
+  const esActiva = estadoEl.classList.contains('status-active');
 
-        if (data.activa) {
-          estadoEl.classList.remove('status-inactive');
-          estadoEl.classList.add('status-active');
-          icon.className = 'fas fa-check-circle';
-          estadoEl.innerHTML = `<i class="fas fa-check-circle"></i> Activa`;
-          boton.textContent = 'Desactivar';
-        } else {
-          estadoEl.classList.remove('status-active');
-          estadoEl.classList.add('status-inactive');
-          icon.className = 'fas fa-times-circle';
-          estadoEl.innerHTML = `<i class="fas fa-times-circle"></i> Inactiva`;
-          boton.textContent = 'Activar';
-        }
+  const mensaje = esActiva
+    ? '¿Estás seguro que deseas desactivar esta incubadora?'
+    : '¿Deseas activar esta incubadora?';
+
+  const confirmar = confirm(mensaje);
+  if (!confirmar) return;
+
+  fetch(`/api/incubadora/${id}/toggle`, {
+    method: 'POST'
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const estado = document.getElementById(`estado-${id}`);
+      const icon = estado.querySelector('i');
+
+      if (data.activa) {
+        estado.classList.remove('status-inactive');
+        estado.classList.add('status-active');
+        estado.innerHTML = `<i class="fas fa-check-circle"></i> Activa`;
       } else {
-        alert('Error al cambiar estado.');
+        estado.classList.remove('status-active');
+        estado.classList.add('status-inactive');
+        estado.innerHTML = `<i class="fas fa-times-circle"></i> Inactiva`;
       }
-    })
-    .catch(err => {
-      console.error('Error en toggle:', err);
-      alert('Error en la petición.');
-    });
-  }
+    } else {
+      alert('No se pudo cambiar el estado.');
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('Error en la petición.');
+  });
+}
+
+
 
   </script>
 </body>
