@@ -10,11 +10,16 @@ from flask import flash
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 mongo_uri = "mongodb+srv://luisAdmin:1234@1stcluster.x5upfob.mongodb.net/?retryWrites=true&w=majority&appName=1stCluster"
 client = MongoClient(mongo_uri)
@@ -154,12 +159,16 @@ def perfil():
         return redirect(url_for('login_form'))
 
     user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
-    imagen_perfil = user.get("imagen_perfil", None)  # por si no hay imagen aún
+    imagen_perfil = user.get("imagen_perfil", None)  # Ruta de la imagen o None
 
     incubadoras = list(incubadoras_col.find({"usuario_id": ObjectId(session["user_id"])}))
     total_incubadoras = len(incubadoras)
     activas = sum(1 for i in incubadoras if i.get("activa", True))
     inactivas = total_incubadoras - activas
+
+    # Ejemplo para fechas y última incubadora, ajusta según tu DB
+    ultima_incubadora = incubadoras[-1].get('nombre', 'N/A') if incubadoras else 'N/A'
+    fecha_registro = user.get('fecha_registro', 'N/A')
 
     return render_template(
         'perfil.html',
@@ -168,9 +177,10 @@ def perfil():
         total_incubadoras=total_incubadoras,
         incubadoras_activas=activas,
         incubadoras_inactivas=inactivas,
-        imagen_perfil=imagen_perfil
+        imagen_perfil=imagen_perfil,
+        ultima_incubadora=ultima_incubadora,
+        fecha_registro=fecha_registro
     )
-
 
 @app.route('/perfil/editar', methods=['GET', 'POST'])
 def editar_perfil():
@@ -190,18 +200,16 @@ def editar_perfil():
 
         usuarios_col.update_one(
             {"_id": ObjectId(session["user_id"])},
-            {"$set": {"nombre": nuevo_nombre, "email": nuevo_email, "password": nueva_password}}
+            {"$set": {
+                "nombre": nuevo_nombre,
+                "email": nuevo_email,
+                "password": nueva_password
+            }}
         )
         flash("Perfil actualizado correctamente", "success")
-        # Actualizamos los datos para volver a mostrar
-        user = usuarios_col.find_one({"_id": ObjectId(session["user_id"])})
-        return render_template('editar_perfil.html', user=user)
+        return redirect(url_for('perfil'))  # <--- Aquí está el cambio
 
     return render_template('editar_perfil.html', user=user)
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/perfil/imagen', methods=['GET', 'POST'])
 def cambiar_imagen():
@@ -230,6 +238,11 @@ def cambiar_imagen():
             print("✅ Archivo válido")
 
             filename = secure_filename(archivo.filename)
+            # Limpia nombre para evitar espacios y paréntesis
+            filename = filename.replace(" ", "_").replace("(", "").replace(")", "")
+            # Agrega user_id para evitar colisiones
+            filename = f"{session['user_id']}_{filename}"
+
             ruta_completa = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             print(f"Intentando guardar en: {ruta_completa}")
 
@@ -241,7 +254,7 @@ def cambiar_imagen():
                 flash("Ocurrió un error al guardar la imagen", "danger")
                 return redirect(request.url)
 
-            ruta_relativa = f"uploads/{filename}" 
+            ruta_relativa = f"/static/uploads/{filename}"
             print(f"Ruta guardada en DB: {ruta_relativa}")
 
             usuarios_col.update_one(

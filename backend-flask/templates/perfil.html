@@ -29,22 +29,24 @@
     <div class="container profile-container">
       
       <!-- Imagen de perfil -->
-      <div class="profile-card profile-image-card">
-        <div class="card-header">
-          <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
-        </div>
-        <div class="card-body" style="text-align: center;">
-          <img src="{{ url_for('static', filename=imagen_perfil) if imagen_perfil else url_for('static', filename='uploads/default.png') }}"
-          alt="perfil IMG"
-          class="profile-img"
-          style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px;">     
-          <div style="margin-top: 10px;">
-            <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-secondary">
-              <i class="fas fa-upload"></i> Cambiar imagen
-            </a>
-          </div>
-        </div>
-      </div>
+<div class="profile-card profile-image-card">
+  <div class="card-header">
+    <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
+  </div>
+  <div class="card-body" style="text-align: center;">
+    {% if imagen_perfil %}
+      <img src="{{ imagen_perfil }}" alt="Imagen de perfil" style="max-width:150px; border-radius:50%;" />
+    {% else %}
+      <img src="/static/images/default_profile.png" alt="Imagen por defecto" style="max-width:150px; border-radius:50%;" />
+    {% endif %}
+    <div style="margin-top: 10px;">
+      <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-secondary">
+        <i class="fas fa-upload"></i> Cambiar imagen
+      </a>
+    </div>
+  </div>
+</div>
+
 
       <!-- Información personal -->
       <div class="profile-card">
