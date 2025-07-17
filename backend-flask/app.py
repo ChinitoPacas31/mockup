@@ -6,6 +6,9 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import flash
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -21,8 +24,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-mongo_uri = "mongodb+srv://luisAdmin:1234@1stcluster.x5upfob.mongodb.net/?retryWrites=true&w=majority&appName=1stCluster"
-client = MongoClient(mongo_uri)
+MONGO_URI = os.getenv("MONGO_URI")
+client = MongoClient(MONGO_URI)
 db = client.incubadorasDB
 
 usuarios_col = db.usuarios
