@@ -4,19 +4,41 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
 
-mongo_uri = "mongodb+srv://luisAdmin:1234@1stcluster.x5upfob.mongodb.net/?retryWrites=true&w=majority&appName=1stCluster"
-client = MongoClient(mongo_uri)
+MONGO_URI = os.getenv("MONGO_URI")
+client = MongoClient(MONGO_URI)
 db = client.incubadorasDB
 
 usuarios_col = db.usuarios
 incubadoras_col = db.incubadoras
 aves_col = db.aves
 registros_col = db.registros
+
+
+@app.route("/api/datos", methods=["POST"])
+def recibir_datos():
+    data = request.json
+    temperatura = data.get("temperatura")
+    humedad = data.get("humedad")
+
+    if temperatura is None or humedad is None:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    registro = {
+        "fecha": datetime.now(),
+        "temperatura": temperatura,
+        "humedad": humedad
+    }
+
+    registros_col.insert_one(registro)
+    return jsonify({"status": "ok"}), 201
 
 # --- RUTAS API PARA APP MOVIL ---
 
