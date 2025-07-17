@@ -34,6 +34,25 @@ aves_col = db.aves
 registros_col = db.registros
 codigos_col = db.codigos_validos
 
+# --- Ruta para mandar los datos a la base --- 
+@app.route("/api/datos", methods=["POST"])
+def recibir_datos():
+    data = request.json
+    temperatura = data.get("temperatura")
+    humedad = data.get("humedad")
+
+    if temperatura is None or humedad is None:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    registro = {
+        "fecha": datetime.now(),
+        "temperatura": temperatura,
+        "humedad": humedad
+    }
+
+    registros_col.insert_one(registro)
+    return jsonify({"status": "ok"}), 201
+
 # --- RUTAS API PARA APP MOVIL ---
 
 @app.route('/api/login', methods=['POST'])
