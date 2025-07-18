@@ -15,7 +15,7 @@
         <p class="profile-welcome">Bienvenido a tu espacio personal</p>
       </div>
       <div class="profile-actions">
-        <a href="{{ url_for('home') }}" class="btn btn-outline">
+        <a href="{{ url_for('home') }}" class="btn btn-gradient">
           <i class="fas fa-arrow-left"></i> Volver al inicio
         </a>
         <a href="{{ url_for('logout') }}" class="btn btn-danger">
@@ -40,9 +40,10 @@
       <img src="/static/images/default_profile.png" alt="Imagen por defecto" style="max-width:150px; border-radius:50%;" />
     {% endif %}
     <div style="margin-top: 10px;">
-      <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-secondary">
-        <i class="fas fa-upload"></i> Cambiar imagen
-      </a>
+      <!-- Cambiar imagen -->
+<a href="{{ url_for('cambiar_imagen') }}" class="btn btn-gradient">
+  <i class="fas fa-upload"></i> Cambiar imagen
+</a>
     </div>
   </div>
 </div>
@@ -69,9 +70,10 @@
             </div>
           </div>
           <div style="margin-top: 15px;">
-            <a href="{{ url_for('editar_perfil') }}" class="btn btn-primary">
-              <i class="fas fa-edit"></i> Editar Perfil
-            </a>
+            <!-- Editar perfil -->
+<a href="{{ url_for('editar_perfil') }}" class="btn btn-gradient">
+  <i class="fas fa-edit"></i> Editar Perfil
+</a>
           </div>
         </div>
       </div>
@@ -112,13 +114,13 @@
           <h2><i class="fas fa-bolt"></i> Acceso rápido</h2>
         </div>
         <div class="card-body" style="display: flex; gap: 15px; flex-wrap: wrap;">
-          <a href="/incubadoras" class="btn btn-primary">
+          <a href="/incubadoras" class="btn btn-gradient">
             <i class="fas fa-egg" aria-hidden="true"></i> Mis Incubadoras
           </a>
-          <a href="/incubadoras#formulario" class="btn btn-secondary">
+          <a href="/incubadoras#formulario" class="btn btn-gradient">
             <i class="fas fa-plus-circle"></i> Agregar Incubadora
           </a>
-          <a href="mailto:soporte@tusitio.com" class="btn btn-outline" target="_blank">
+          <a href="nestium@gmail.com" class="btn btn-outline" target="_blank">
             <i class="fas fa-headset" aria-hidden="true"></i> Soporte
           </a>
         </div>

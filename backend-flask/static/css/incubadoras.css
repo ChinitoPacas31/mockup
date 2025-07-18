@@ -45,6 +45,12 @@
     align-items: center;
   }
 
+  .header-content > div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
   h1 {
     color: var(--primary-color);
     font-size: 28px;
@@ -82,6 +88,23 @@
     background-color: #4a6bff;
     transform: translateY(-2px);
   }
+
+  /* Botón degradado moderno */
+.btn-gradient {
+  background: linear-gradient(90deg, #5d78ff 0%, #ff7e5f 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(93,120,255,0.15);
+  transition: background 0.3s, transform 0.2s;
+  overflow: hidden;
+}
+
+.btn-gradient:hover, .btn-gradient:focus {
+  background: linear-gradient(90deg, #4a6bff 0%, #ff9a7c 100%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 24px rgba(93,120,255,0.25);
+  color: #fff;
+}
 
   .card {
     background-color: white;
@@ -345,4 +368,10 @@
       flex-wrap: wrap;
       margin-top: 10px;
     }
+  }
+
+  .navbar-logo {
+    height: 60px;
+    margin-right: 10px;
+    vertical-align: middle;
   }
