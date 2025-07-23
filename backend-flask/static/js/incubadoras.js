@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const buscador = document.getElementById('buscador');
 const allItems = Array.from(document.querySelectorAll('.incubadora-item'));
 const paginacion = document.getElementById('paginacion');
-const porPagina = 4;
+const porPagina = 5;
 let paginaActual = 1;
 let itemsFiltrados = [...allItems]; // Inicialmente, todos
 
