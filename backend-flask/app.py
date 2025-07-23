@@ -7,6 +7,9 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import flash
 from dotenv import load_dotenv
+from flask import Response
+import csv
+import io
 
 load_dotenv()
 
@@ -464,6 +467,35 @@ def toggle_incubadora(id):
     incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": {"activa": nueva_activa}})
     
     return jsonify({"success": True, "activa": nueva_activa})
+
+@app.route('/exportar-registros/<incubadora_id>')
+def exportar_registros(incubadora_id):
+    # Verifica que la incubadora existe
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+    if not incubadora:
+        return "Incubadora no encontrada", 404
+
+    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fechaHora", 1)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Fecha y Hora', 'Temperatura (°C)', 'Humedad (%)'])
+
+    for r in registros_cursor:
+        writer.writerow([
+            r.get("fechaHora").strftime('%Y-%m-%d %H:%M:%S') if r.get("fechaHora") else '',
+            r.get("temperatura", ''),
+            r.get("humedad", '')
+        ])
+
+    output.seek(0)
+    filename = f"registros_{incubadora['nombre'].replace(' ', '_')}.csv"
+
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
