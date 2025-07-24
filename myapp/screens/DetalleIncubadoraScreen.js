@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
+    marginTop: 45
   },
   backButton: {
     padding: 8,

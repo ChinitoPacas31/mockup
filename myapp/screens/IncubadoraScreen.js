@@ -295,12 +295,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#2D3748',
+    marginTop: 45,
     fontFamily: 'Inter-Bold'
   },
   addButton: {
     backgroundColor: '#4C51BF',
     width: 48,
     height: 48,
+    marginTop: 45,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',

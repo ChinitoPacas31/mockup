@@ -16,12 +16,11 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Splash">
-        <Stack.Screen 
-          name="Splash" 
-          component={SplashScreen} 
-          options={{ headerShown: false }} // Oculta el header en el splash
-        />
+      <Stack.Navigator 
+        initialRouteName="Splash"
+        screenOptions={{ headerShown: false }} // Esto oculta el header en TODAS las pantallas
+      >
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Registro" component={RegistroScreen} />
         <Stack.Screen name="Incubadoras" component={IncubadorasScreen} />
