@@ -28,13 +28,8 @@ export default function IncubadorasScreen({ route, navigation }) {
   const itemsPerPage = 4;
 
   useEffect(() => {
-    // Refresco inicial
     cargarIncubadoras();
-    
-    // Refresco por intervalo
     const interval = setInterval(cargarIncubadoras, 30000);
-    
-    // Refresco al volver a la pantalla
     const unsubscribe = navigation.addListener('focus', cargarIncubadoras);
 
     return () => {
@@ -54,10 +49,6 @@ export default function IncubadorasScreen({ route, navigation }) {
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    cargarIncubadoras();
-  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -79,12 +70,10 @@ export default function IncubadorasScreen({ route, navigation }) {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() =>
-        navigation.navigate('DetalleIncubadora', {
-          incubadoraId: item.id,
-          userId: userId
-        })
-      }
+      onPress={() => navigation.navigate('DetalleIncubadora', {
+        incubadoraId: item.id,
+        userId: userId
+      })}
       activeOpacity={0.9}
     >
       <View style={styles.cardHeader}>
@@ -111,21 +100,19 @@ export default function IncubadorasScreen({ route, navigation }) {
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
           <Ionicons name="barcode-outline" size={16} color="#4A5568" />
-          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.codigo}</Text>
+          <Text style={styles.infoText}>{item.codigo}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="location-outline" size={16} color="#4A5568" />
-          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.ubicacion}</Text>
+          <Text style={styles.infoText}>{item.ubicacion}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="egg-outline" size={16} color="#4A5568" />
-          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.tipo_ave || 'No especificado'}</Text>
+          <Text style={styles.infoText}>{item.tipo_ave || 'No especificado'}</Text>
         </View>
       </View>
-
-
     </TouchableOpacity>
   );
 
@@ -139,7 +126,7 @@ export default function IncubadorasScreen({ route, navigation }) {
           disabled={currentPage === 1}
           style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
         >
-          <Ionicons name="chevron-back" size={16} color={currentPage === 1 ? "#A0AEC0" : "#4C51BF"} />
+          <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#A0AEC0" : "#6C63FF"} />
         </TouchableOpacity>
         
         <Text style={styles.pageText}>
@@ -151,7 +138,7 @@ export default function IncubadorasScreen({ route, navigation }) {
           disabled={currentPage === totalPages}
           style={[styles.pageButton, currentPage === totalPages && styles.pageButtonDisabled]}
         >
-          <Ionicons name="chevron-forward" size={16} color={currentPage === totalPages ? "#A0AEC0" : "#4C51BF"} />
+          <Ionicons name="chevron-forward" size={20} color={currentPage === totalPages ? "#A0AEC0" : "#6C63FF"} />
         </TouchableOpacity>
       </View>
     );
@@ -160,7 +147,7 @@ export default function IncubadorasScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4C51BF" />
+        <ActivityIndicator size="large" color="#6C63FF" />
         <Text style={styles.loadingText}>Cargando incubadoras...</Text>
       </View>
     );
@@ -169,11 +156,9 @@ export default function IncubadorasScreen({ route, navigation }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        {/* Header */}
+        {/* Header con nuevo diseño */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Mis Incubadoras</Text>
-          </View>
+          <Text style={styles.title}>Mis Incubadoras</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
@@ -250,8 +235,8 @@ export default function IncubadorasScreen({ route, navigation }) {
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  colors={['#4C51BF']}
-                  tintColor="#4C51BF"
+                  colors={['#6C63FF']}
+                  tintColor="#6C63FF"
                 />
               }
               showsVerticalScrollIndicator={false}
@@ -267,50 +252,49 @@ export default function IncubadorasScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 16,
-    paddingTop: 24
+    backgroundColor: '#F8F9FA',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   loadingText: {
     marginTop: 16,
-    color: '#718096',
-    fontSize: 16
+    color: '#6C63FF',
+    fontSize: 16,
+    fontWeight: '500',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24
-  },
-  greetingText: {
-    fontSize: 16,
-    color: '#718096'
+    padding: 20,
+    paddingTop: 50,
+    backgroundColor: '#6C63FF',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#2D3748',
-    marginTop: 45,
-    fontFamily: 'Inter-Bold'
+    color: '#FFF',
+    flex: 1,
+    textAlign: 'center',
   },
   addButton: {
-    backgroundColor: '#4C51BF',
     width: 48,
     height: 48,
-    marginTop: 45,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -319,21 +303,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    marginBottom: 20
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   searchIcon: {
-    marginRight: 10
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: '#2D3748',
-    paddingVertical: 0
+    paddingVertical: 0,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   statCard: {
     backgroundColor: '#FFFFFF',
@@ -341,34 +327,29 @@ const styles = StyleSheet.create({
     padding: 16,
     width: '30%',
     alignItems: 'center',
-    elevation: 1,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4C51BF',
-    marginBottom: 4
+    color: '#6C63FF',
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 14,
-    color: '#718096'
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginBottom: 16
+    color: '#718096',
   },
   listContent: {
-    paddingBottom: 16
+    paddingHorizontal: 15,
+    paddingBottom: 20,
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: 16
+    marginBottom: 16,
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -378,13 +359,13 @@ const styles = StyleSheet.create({
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 12,
   },
   cardIconContainer: {
     width: 32,
@@ -392,96 +373,86 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8
+    marginRight: 8,
   },
   nombre: {
     fontSize: 16,
     fontWeight: '600',
     color: '#2D3748',
-    flex: 1
+    flex: 1,
   },
   statusIconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     height: 80,
-    marginVertical: 12
+    marginVertical: 12,
   },
   activeStatus: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
   inactiveStatus: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
   statusLabel: {
     marginTop: 4,
     fontSize: 12,
     fontWeight: 'bold',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
   },
   cardBody: {
-    marginBottom: 12
+    marginBottom: 12,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   infoText: {
     marginLeft: 8,
     color: '#4A5568',
     fontSize: 12,
-    flex: 1
-  },
-  detailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#EDF2F7',
-    marginTop: 8
-  },
-  detailsButtonText: {
-    color: '#4C51BF',
-    fontSize: 12,
-    fontWeight: '600',
-    marginRight: 4
+    flex: 1,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60
+    paddingVertical: 60,
   },
   emptyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2D3748',
     marginTop: 16,
-    marginBottom: 8
+    marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
     color: '#718096',
     textAlign: 'center',
     maxWidth: '80%',
-    marginBottom: 24
+    marginBottom: 24,
   },
   addFirstButton: {
-    backgroundColor: '#4C51BF',
+    backgroundColor: '#6C63FF',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8
+    borderRadius: 8,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   addFirstButtonText: {
     color: '#FFF',
-    fontWeight: '600'
+    fontWeight: '600',
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 30
+    marginVertical: 20,
   },
   pageButton: {
     padding: 8,
@@ -489,11 +460,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   pageButtonDisabled: {
-    opacity: 0.5
+    opacity: 0.5,
   },
   pageText: {
     marginHorizontal: 15,
     color: '#4A5568',
-    fontSize: 14
-  }
+    fontSize: 14,
+  },
 });
