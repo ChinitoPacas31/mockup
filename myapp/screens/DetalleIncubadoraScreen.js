@@ -13,6 +13,18 @@ export default function DetalleIncubadora({ route, navigation }) {
   const [registros, setRegistros] = useState([]);
   const [showRegistros, setShowRegistros] = useState(false);
 
+  const toggleEstado = async () => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/incubadora/${incubadoraId}/toggle`);
+      if (res.data.success) {
+        setIncubadora({ ...incubadora, activa: res.data.activa });
+      }
+    } catch (error) {
+      console.error('Error al cambiar el estado:', error);
+    }
+  };
+  
+
   useEffect(() => {
     const cargarDetalles = async () => {
       try {
@@ -129,6 +141,27 @@ export default function DetalleIncubadora({ route, navigation }) {
               </Text>
             </View>
           </View>
+          <View style={{ alignItems: 'center', marginTop: 10 }}>
+  <TouchableOpacity
+    onPress={toggleEstado}
+    style={[
+      styles.estadoButton,
+      incubadora.activa ? styles.btnDesactivar : styles.btnActivar
+    ]}
+    activeOpacity={0.8}
+  >
+    <Ionicons
+      name={incubadora.activa ? 'power' : 'power'}
+      size={20}
+      color="#FFF"
+      style={{ marginRight: 8 }}
+    />
+    <Text style={styles.estadoButtonText}>
+      {incubadora.activa ? 'Desactivar' : 'Activar'}
+    </Text>
+  </TouchableOpacity>
+</View>
+
         </View>
       </View>
 
@@ -437,4 +470,24 @@ const styles = StyleSheet.create({
   buttonIcon: {
     marginRight: 8,
   },
+  estadoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    marginTop: 10,
+  },
+  btnActivar: {
+    backgroundColor: '#38A169',
+  },
+  btnDesactivar: {
+    backgroundColor: '#E53E3E',
+  },
+  estadoButtonText: {
+    color: '#FFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  
 });
