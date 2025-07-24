@@ -7,13 +7,16 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
-  TextInput
+  TextInput,
+  ScrollView,
+  Dimensions
 } from 'react-native';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '../config';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 
+const { width } = Dimensions.get('window');
 
 export default function IncubadorasScreen({ route, navigation }) {
   const { userId } = route.params;
@@ -22,7 +25,23 @@ export default function IncubadorasScreen({ route, navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    // Refresco inicial
+    cargarIncubadoras();
+    
+    // Refresco por intervalo
+    const interval = setInterval(cargarIncubadoras, 30000);
+    
+    // Refresco al volver a la pantalla
+    const unsubscribe = navigation.addListener('focus', cargarIncubadoras);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, []);
 
   const cargarIncubadoras = async () => {
     try {
@@ -66,67 +85,76 @@ export default function IncubadorasScreen({ route, navigation }) {
           userId: userId
         })
       }
-      activeOpacity={0.8}
+      activeOpacity={0.9}
     >
       <View style={styles.cardHeader}>
-        <View style={styles.cardIconContainer}>
+        <View style={[styles.cardIconContainer, {backgroundColor: item.activa ? '#38A169' : '#E53E3E'}]}>
           <Ionicons name="egg" size={20} color="#FFF" />
         </View>
-        <Text style={styles.nombre}>{item.nombre}</Text>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: item.activa ? '#38A169' : '#E53E3E' }
-          ]}
-        >
-          <Text style={styles.statusText}>{item.activa ? 'ACTIVA' : 'INACTIVA'}</Text>
-        </View>
+        <Text style={styles.nombre} numberOfLines={1} ellipsizeMode="tail">{item.nombre}</Text>
+      </View>
+
+      <View style={styles.statusIconContainer}>
+        {item.activa ? (
+          <View style={styles.activeStatus}>
+            <Ionicons name="checkmark-circle" size={60} color="#38A169" />
+            <Text style={styles.statusLabel}>ACTIVA</Text>
+          </View>
+        ) : (
+          <View style={styles.inactiveStatus}>
+            <Ionicons name="close-circle" size={60} color="#E53E3E" />
+            <Text style={styles.statusLabel}>INACTIVA</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
-          <Ionicons name="barcode-outline" size={16} color="#718096" />
-          <Text style={styles.infoText}>{item.codigo}</Text>
+          <Ionicons name="barcode-outline" size={16} color="#4A5568" />
+          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.codigo}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Ionicons name="location-outline" size={16} color="#718096" />
-          <Text style={styles.infoText}>{item.ubicacion}</Text>
+          <Ionicons name="location-outline" size={16} color="#4A5568" />
+          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.ubicacion}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Ionicons name="egg-outline" size={16} color="#718096" />
-          <Text style={styles.infoText}>{item.tipo_ave}</Text>
+          <Ionicons name="egg-outline" size={16} color="#4A5568" />
+          <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">{item.tipo_ave || 'No especificado'}</Text>
         </View>
       </View>
 
-      <View style={styles.cardFooter}>
-        <Text style={styles.moreInfo}>Ver detalles →</Text>
-      </View>
+
     </TouchableOpacity>
   );
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
-    const buttons = [];
-
-    for (let i = 1; i <= totalPages; i++) {
-      buttons.push(
+    return (
+      <View style={styles.paginationContainer}>
         <TouchableOpacity
-          key={i}
-          onPress={() => setCurrentPage(i)}
-          style={[
-            styles.pageButton,
-            i === currentPage && styles.pageButtonActive
-          ]}
+          onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
         >
-          <Text style={styles.pageButtonText}>{i}</Text>
+          <Ionicons name="chevron-back" size={16} color={currentPage === 1 ? "#A0AEC0" : "#4C51BF"} />
         </TouchableOpacity>
-      );
-    }
-
-    return <View style={styles.paginationContainer}>{buttons}</View>;
+        
+        <Text style={styles.pageText}>
+          Página {currentPage} de {totalPages}
+        </Text>
+        
+        <TouchableOpacity
+          onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          style={[styles.pageButton, currentPage === totalPages && styles.pageButtonDisabled]}
+        >
+          <Ionicons name="chevron-forward" size={16} color={currentPage === totalPages ? "#A0AEC0" : "#4C51BF"} />
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   if (loading) {
@@ -140,55 +168,98 @@ export default function IncubadorasScreen({ route, navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mis Incubadoras</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
-        >
-          <Ionicons name="add" size={24} color="#FFF" />
-        </TouchableOpacity>
-      </View>
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar por nombre, ubicación o código"
-        placeholderTextColor="#A0AEC0"
-        value={searchTerm}
-        onChangeText={(text) => {
-          setSearchTerm(text);
-          setCurrentPage(1); // Resetear a la primera página cuando se busca
-        }}
-      />
-
-      {filteredIncubadoras.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="egg-outline" size={60} color="#CBD5E0" />
-          <Text style={styles.emptyTitle}>No hay incubadoras</Text>
-          <Text style={styles.emptySubtitle}>No se encontraron resultados</Text>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Mis Incubadoras</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
+          >
+            <Ionicons name="add" size={24} color="#FFF" />
+          </TouchableOpacity>
         </View>
-      ) : (
-        <>
-          <FlatList
-            data={paginatedIncubadoras}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={['#4C51BF']}
-                tintColor="#4C51BF"
-              />
-            }
-            showsVerticalScrollIndicator={false}
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar incubadoras..."
+            placeholderTextColor="#A0AEC0"
+            value={searchTerm}
+            onChangeText={(text) => {
+              setSearchTerm(text);
+              setCurrentPage(1);
+            }}
           />
-          {renderPagination()}
-        </>
-      )}
-    </View>
+          {searchTerm.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchTerm('')}>
+              <Ionicons name="close-circle" size={20} color="#A0AEC0" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Stats Overview */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{incubadoras.length}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{incubadoras.filter(i => i.activa).length}</Text>
+            <Text style={styles.statLabel}>Activas</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{incubadoras.filter(i => !i.activa).length}</Text>
+            <Text style={styles.statLabel}>Inactivas</Text>
+          </View>
+        </View>
+
+        {/* Incubadoras List */}
+        {filteredIncubadoras.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="egg-outline" size={80} color="#E2E8F0" />
+            <Text style={styles.emptyTitle}>No se encontraron incubadoras</Text>
+            <Text style={styles.emptySubtitle}>
+              {searchTerm.length > 0 
+                ? "Prueba con otros términos de búsqueda" 
+                : "Agrega una nueva incubadora para comenzar"}
+            </Text>
+            {searchTerm.length === 0 && (
+              <TouchableOpacity 
+                style={styles.addFirstButton}
+                onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
+              >
+                <Text style={styles.addFirstButtonText}>Agregar Incubadora</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <>
+            <FlatList
+              data={paginatedIncubadoras}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              contentContainerStyle={styles.listContent}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={['#4C51BF']}
+                  tintColor="#4C51BF"
+                />
+              }
+              showsVerticalScrollIndicator={false}
+            />
+            {renderPagination()}
+          </>
+        )}
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -197,7 +268,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 24
   },
   loadingContainer: {
@@ -214,7 +285,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 24
+  },
+  greetingText: {
+    fontSize: 16,
+    color: '#718096'
   },
   title: {
     fontSize: 28,
@@ -224,119 +299,199 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#4C51BF',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4
   },
-  searchInput: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#EDF2F7',
     borderRadius: 12,
-    paddingVertical: 10,
     paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 20
+  },
+  searchIcon: {
+    marginRight: 10
+  },
+  searchInput: {
+    flex: 1,
     fontSize: 16,
-    marginBottom: 16,
-    color: '#2D3748'
+    color: '#2D3748',
+    paddingVertical: 0
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20
+  },
+  statCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    width: '30%',
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4C51BF',
+    marginBottom: 4
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#718096'
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2D3748',
+    marginBottom: 16
   },
   listContent: {
-    paddingBottom: 24
+    paddingBottom: 16
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 16
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0'
+    width: '48%',
+    padding: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 12
   },
   cardIconContainer: {
-    backgroundColor: '#4C51BF',
     width: 32,
     height: 32,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12
+    marginRight: 8
   },
   nombre: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#2D3748',
     flex: 1
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12
+  statusIconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 80,
+    marginVertical: 12
   },
-  statusText: {
-    color: '#FFF',
+  activeStatus: {
+    alignItems: 'center'
+  },
+  inactiveStatus: {
+    alignItems: 'center'
+  },
+  statusLabel: {
+    marginTop: 4,
     fontSize: 12,
     fontWeight: 'bold',
     textTransform: 'uppercase'
   },
   cardBody: {
-    paddingLeft: 44
+    marginBottom: 12
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 8
   },
   infoText: {
-    marginLeft: 12,
+    marginLeft: 8,
     color: '#4A5568',
-    fontSize: 14
+    fontSize: 12,
+    flex: 1
   },
-  cardFooter: {
-    marginTop: 8,
-    alignItems: 'flex-end'
+  detailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EDF2F7',
+    marginTop: 8
   },
-  moreInfo: {
+  detailsButtonText: {
     color: '#4C51BF',
-    fontSize: 14
+    fontSize: 12,
+    fontWeight: '600',
+    marginRight: 4
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40
+    paddingVertical: 60
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#2D3748',
-    marginTop: 16
+    marginTop: 16,
+    marginBottom: 8
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#718096',
-    marginTop: 4
+    textAlign: 'center',
+    maxWidth: '80%',
+    marginBottom: 24
+  },
+  addFirstButton: {
+    backgroundColor: '#4C51BF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8
+  },
+  addFirstButtonText: {
+    color: '#FFF',
+    fontWeight: '600'
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
-    marginBottom: 35
+    alignItems: 'center',
+    marginVertical: 30
   },
   pageButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 15,
-    marginHorizontal: 4
+    padding: 8,
+    borderRadius: 8,
+    marginHorizontal: 15,
   },
-  pageButtonActive: {
-    backgroundColor: '#4C51BF'
+  pageButtonDisabled: {
+    opacity: 0.5
   },
-  pageButtonText: {
-    color: '#2D3748',
-    fontWeight: '600'
+  pageText: {
+    marginHorizontal: 15,
+    color: '#4A5568',
+    fontSize: 14
   }
 });
