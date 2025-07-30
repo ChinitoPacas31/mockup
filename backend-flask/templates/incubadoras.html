@@ -12,8 +12,12 @@
   <header>
     <div class="container header-content">
       <img src="/static/images/logo.png" alt="Logo empresa" class="navbar-logo" />
-      <h1 style="color: #000;">"Bienvenido" {{ nombre }}</h1>
-      <div>
+      
+      <div class="welcome-message">
+        <h1>Bienvenido: {{ nombre }}</h1>
+      </div>
+  
+      <div class="header-buttons">
         <a href="/perfil" class="btn btn-gradient">
           <i class="fas fa-user"></i> Perfil
         </a>
@@ -23,6 +27,7 @@
       </div>
     </div>
   </header>
+  
 
   <div class="container">
     <div class="card">

@@ -35,42 +35,115 @@ body {
 
 /* Header mejorado */
 header {
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 15px 0;
+  background: #f0f0ff;
+  box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15);
+  padding: 12px 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(8px);
-  background-color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(67, 97, 238, 0.1);
+  border-radius: 0 0 25px 25px;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.header-content > div {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .navbar-logo {
-  height: 45px;
+  height: 50px;
   width: auto;
   transition: var(--transition);
+  filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.2));
 }
 
-.navbar-logo:hover {
-  transform: scale(1.05);
+.welcome-message h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  margin: 0;
+  padding: 8px 15px;
+  background: rgba(67, 97, 238, 0.08);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-message h1::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-gradient {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff4757 0%, #cc2e3d 100%);
+  color: white;
+}
+
+/* Elimina el subrayado de los botones */
+.header-buttons a {
+  text-decoration: none !important;
+}
+
+/* Opcional: Si persiste el problema, añade esto */
+.btn {
+  text-decoration: none;
+  border: none;
+  outline: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .welcome-message {
+    order: 2;
+    text-align: center;
+  }
+  
+  .header-buttons {
+    order: 3;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .navbar-logo {
+    order: 1;
+    margin: 0 auto 10px;
+  }
 }
 
 h1 {
@@ -84,27 +157,6 @@ h1 span {
   color: var(--primary-color);
 }
 
-/* Botones mejorados */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  text-decoration: none;
-  transition: var(--transition);
-  border: none;
-  cursor: pointer;
-  font-size: 15px;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.btn i {
-  font-size: 16px;
-}
-
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
@@ -114,17 +166,6 @@ h1 span {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #ff4757 0%, #cc2e3d 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
-}
-
-.btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
 }
 
 .btn-outline {
@@ -463,18 +504,6 @@ input:focus, select:focus, textarea:focus {
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-  }
-  
-  .header-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
   .incubadora-list {
     grid-template-columns: 1fr;
   }
