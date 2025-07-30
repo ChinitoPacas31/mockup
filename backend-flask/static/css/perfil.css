@@ -215,9 +215,8 @@ body {
 }
 
 .btn-danger {
-  background-color: #ff4d4f;
   color: white;
-  border: 2px solid #ff4d4f;
+  background: linear-gradient(135deg, #ff4757 0%, #cc2e3d 100%);
 }
 
 .btn-danger:hover {
