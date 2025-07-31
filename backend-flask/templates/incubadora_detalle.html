@@ -63,13 +63,13 @@
             <p>
               <button 
   id="estado-{{ incubadora._id }}" 
-  class="btn {{ 'btn-success' if incubadora.activa else 'btn-danger' }}" 
-  onclick="toggleEstado('{{ incubadora._id }}')" 
-  style="cursor: pointer;"
+  class="btn {{ 'btn-disabled' if incubadora.activa else 'btn-danger' }}" 
+  {% if not incubadora.activa %}onclick="toggleEstado('{{ incubadora._id }}')" style="cursor: pointer;"{% endif %}
 >
   <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
-  {{ "Iniciado" if incubadora.activa else "Terminado" }}
+  {{ "Iniciado" if incubadora.activa else "Iniciar" }}
 </button>
+
 
               
             </p>
