@@ -99,7 +99,7 @@ export default function EditarPerfilScreen({ route, navigation }) {
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.title}>Editar Perfil</Text>
-        <View style={{ width: 48 }} /> {/* Placeholder para simetría */}
+        <View style={{ width: 48 }} />
       </View>
 
       <KeyboardAvoidingView
