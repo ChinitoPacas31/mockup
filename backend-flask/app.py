@@ -662,6 +662,22 @@ def api_cambiar_imagen_perfil(user_id):
 
     return jsonify({"success": True, "imagen_perfil": ruta_relativa})
 
+@app.route("/apagar-incubadora/<id>", methods=["POST"])
+def apagar_incubadora(id):
+    user_id = ObjectId(session["user_id"])
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
+    if not incubadora:
+        return jsonify({"error": "Incubadora no encontrada"}), 404
+
+    incubadoras_col.update_one({"_id": ObjectId(id)}, {
+        "$set": {
+            "activa": False,
+            "inicio_activacion": None,
+            "ave_id": None  # Opcional: reiniciar el ave seleccionada
+        }
+    })
+    return jsonify({"message": "Apagada correctamente"}), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

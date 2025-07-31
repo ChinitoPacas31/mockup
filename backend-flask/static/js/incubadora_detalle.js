@@ -196,3 +196,28 @@ async function seleccionarAve() {
 
   cerrarModal();
 }
+
+function confirmarApagado(incubadoraId) {
+  const primeraConfirmacion = confirm("¿Estás seguro de que quieres apagar esta incubadora?");
+  if (primeraConfirmacion) {
+    const segundaConfirmacion = confirm("Esta acción detendrá el ciclo actual. ¿Confirmas?");
+    if (segundaConfirmacion) {
+      // Puedes usar fetch o redirigir a una ruta que apague la incubadora
+      fetch(`/apagar-incubadora/${incubadoraId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Incubadora apagada correctamente.");
+          location.reload(); // Recargar la página para actualizar estado
+        } else {
+          alert("Ocurrió un error al apagar la incubadora.");
+        }
+      });
+    }
+  }
+}

@@ -91,9 +91,14 @@ header {
   text-decoration: none !important;
 }
 
+.btn-success {
+  background-color: #27ae60;
+  color: rgb(255, 255, 255);
+}
+
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(242, 255, 1, 0.1);
 }
 
 .btn-primary {
@@ -178,7 +183,7 @@ header {
 
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 15px 30px rgba(65, 116, 245, 0.921);
   }
 
   h2 {
@@ -266,7 +271,7 @@ header {
   }
 
   .status-inactive {
-    background-color: rgba(255, 71, 87, 0.2);
+    background-color: rgba(227, 242, 17, 0.274);
     color: var(--danger-color);
   }
 
@@ -398,3 +403,4 @@ header {
     font-weight: bold;
     cursor: pointer;
   }
+

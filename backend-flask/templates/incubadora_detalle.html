@@ -61,14 +61,35 @@
           <div class="info-content">
             <h3>Iniciar Ciclo</h3>
             <p>
-              <span id="estado-{{ incubadora._id }}" class="status-badge {{ 'status-active' if incubadora.activa else 'status-inactive' }}" onclick="toggleEstado('{{ incubadora._id }}')">
-                <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
-                {{ "Iniciado" if incubadora.activa else "Terminado" }}
-              </span>
+              <button 
+  id="estado-{{ incubadora._id }}" 
+  class="btn {{ 'btn-success' if incubadora.activa else 'btn-danger' }}" 
+  onclick="toggleEstado('{{ incubadora._id }}')" 
+  style="cursor: pointer;"
+>
+  <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
+  {{ "Iniciado" if incubadora.activa else "Terminado" }}
+</button>
+
               
             </p>
           </div>
         </div>
+
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-power-off"></i>
+          </div>
+          <div class="info-content">
+            <h3>Estado</h3>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-danger" onclick="confirmarApagado('{{ incubadora._id }}')">
+                <i class="fas fa-power-off"></i> Apagar
+              </button>
+            </div>
+          </div>
+        </div>
+     
       </div>
 
       <div class="chart-container">
