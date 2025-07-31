@@ -325,22 +325,39 @@ def logout():
 def incubadoras():
     if request.method == 'POST':
         data = request.form
-        ave_id = data.get("ave_id")
         codigo = data.get("codigo")
 
-        if not ave_id or not codigo:
-            return render_template("incubadoras.html", error="Tipo de ave y código son requeridos")
+        # Validar que codigo no esté vacío
+        if not codigo:
+            # Guardamos incubadoras para mostrar la página con error
+            user_id = ObjectId(session["user_id"])
+            incubadoras = []
+            for doc in incubadoras_col.find({"usuario_id": user_id}):
+                incubadoras.append({
+                    "id": str(doc["_id"]),
+                    "codigo": doc["codigo"],
+                    "nombre": doc["nombre"],
+                    "ubicacion": doc["ubicacion"],
+                    "activa": doc.get("activa", True),
+                })
+            return render_template("incubadoras.html", error="Código es requerido", incubadoras=incubadoras, nombre=session.get("user_name"))
 
         # Validar código
         codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
         if not codigo_valido:
-            # Reenviar con mensaje de error
             user_id = ObjectId(session["user_id"])
-            incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
-            aves = list(aves_col.find())
-            return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
+            incubadoras = []
+            for doc in incubadoras_col.find({"usuario_id": user_id}):
+                incubadoras.append({
+                    "id": str(doc["_id"]),
+                    "codigo": doc["codigo"],
+                    "nombre": doc["nombre"],
+                    "ubicacion": doc["ubicacion"],
+                    "activa": doc.get("activa", True),
+                })
+            return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"))
 
-        # Insertar incubadora
+        # Insertar incubadora SIN ave_id
         incubadoras_col.insert_one({
             "codigo": codigo,
             "nombre": data["nombre"],
@@ -348,30 +365,25 @@ def incubadoras():
             "activa": False,
             "inicio_activacion": None,
             "usuario_id": ObjectId(session["user_id"]),
-            "ave_id": ObjectId(ave_id)
         })
 
         codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
 
-        # Mostrar mensaje de éxito
-        user_id = ObjectId(session["user_id"])
-        incubadoras = list(incubadoras_col.find({"usuario_id": user_id}))
-        aves = list(aves_col.find())
-        return render_template("incubadoras.html", success="Incubadora agregada correctamente", incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
+        # Redireccionar a GET para evitar reenvío del formulario
+        return redirect(url_for('incubadoras'))
+    
+    # GET
     user_id = ObjectId(session["user_id"])
     incubadoras = []
     for doc in incubadoras_col.find({"usuario_id": user_id}):
-        ave = aves_col.find_one({"_id": doc.get("ave_id")})
         incubadoras.append({
             "id": str(doc["_id"]),
             "codigo": doc["codigo"],
             "nombre": doc["nombre"],
             "ubicacion": doc["ubicacion"],
             "activa": doc.get("activa", True),
-            "tipo_ave": ave["nombre"] if ave else "Desconocido"
         })
-    aves = list(aves_col.find())
-    return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
+    return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"))
 
 @app.route('/incubadora/<id>')
 def ver_incubadora(id):
@@ -383,6 +395,7 @@ def ver_incubadora(id):
         return "Incubadora no encontrada", 404
 
     ave = aves_col.find_one({"_id": incubadora.get("ave_id")})
+    aves = list(aves_col.find())  # <--- AGREGADO
 
     dias_transcurridos = 0
     finalizado = False
@@ -392,24 +405,24 @@ def ver_incubadora(id):
         ahora_utc = datetime.now(timezone.utc).date()
         inicio_utc = inicio.astimezone(timezone.utc).date()
         dias_transcurridos = (inicio_utc - ahora_utc).days
-        finalizado = dias_transcurridos >= ave["dias_incubacion"]
+        finalizado = dias_transcurridos >= ave["dias_incubacion"] if ave else False
 
-        # 👇 Aquí actualizamos la incubadora si ya terminó
         if finalizado:
             incubadoras_col.update_one(
                 {"_id": ObjectId(id)},
                 {"$set": {"activa": False}}
             )
-            # También puedes recargar la variable si quieres:
             incubadora["activa"] = False
 
     return render_template(
         "incubadora_detalle.html",
         incubadora=incubadora,
         ave=ave,
+        aves=aves,  # <--- AGREGADO
         dias_transcurridos=dias_transcurridos,
         finalizado=finalizado
     )
+
 
 @app.route('/incubadora/<id>/registros')
 def registros_incubadora(id):
@@ -504,6 +517,35 @@ def toggle_incubadora(id):
     incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": actualizacion})
     
     return jsonify({"success": True, "activa": nueva_activa})
+
+@app.route('/api/incubadora/<id>/asignar-ave', methods=['POST'])
+def asignar_ave(id):
+    data = request.get_json()
+    ave_id = data.get('ave_id')
+
+    ave = aves_col.find_one({'_id': ObjectId(ave_id)})
+    if not ave:
+        return jsonify({'success': False, 'message': 'Ave no encontrada'}), 404
+
+    incubadoras_col.update_one(
+        {'_id': ObjectId(id)},
+        {
+            '$set': {
+                'ave_id': ave['_id'],
+                'activa': True,
+                'inicio_activacion': datetime.now()
+            }
+        }
+    )
+
+    return jsonify({
+        'success': True,
+        'nombre_ave': ave['nombre'],
+        'dias_incubacion': ave['dias_incubacion'],
+        'temperatura': ave.get('temperatura_ideal', ''),
+        'humedad': ave.get('humedad_ideal', '')
+    })
+
 
 @app.route('/exportar-registros/<incubadora_id>')
 def exportar_registros(incubadora_id):

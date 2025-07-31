@@ -59,11 +59,11 @@
             <i class="fas fa-power-off"></i>
           </div>
           <div class="info-content">
-            <h3>Estado</h3>
+            <h3>Iniciar Ciclo</h3>
             <p>
               <span id="estado-{{ incubadora._id }}" class="status-badge {{ 'status-active' if incubadora.activa else 'status-inactive' }}" onclick="toggleEstado('{{ incubadora._id }}')">
                 <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
-                {{ "Activa" if incubadora.activa else "Inactiva" }}
+                {{ "Iniciado" if incubadora.activa else "Terminado" }}
               </span>
               
             </p>
@@ -84,53 +84,74 @@
 
     <div class="card">
       <h2><i class="fas fa-dove"></i> Especificaciones del Huevo</h2>
-      <p style="margin-bottom: 20px; color: var(--secondary-color);">Configuración óptima para {{ ave.nombre }}</p>
       
-      <div class="specs-grid">
-        <div class="spec-card">
-          <h3><i class="fas fa-thermometer-half"></i> Temperatura</h3>
-          <div class="spec-item">
-            <span class="spec-label">Requerida</span>
-            <span class="spec-value temp-value">{{ ave.temperatura }} °C</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Actual</span>
-            <span class="spec-value temp-value">37.5 °C <i class="fas fa-check-circle" style="color: var(--success-color);"></i></span>
-          </div>
-        </div>
+      {% if ave and ave.nombre %}
+        <p style="margin-bottom: 20px; color: var(--secondary-color);">Configuración óptima para {{ ave.nombre }}</p>
         
-        <div class="spec-card">
-          <h3><i class="fas fa-tint"></i> Humedad</h3>
-          <div class="spec-item">
-            <span class="spec-label">Requerida</span>
-            <span class="spec-value humidity-value">{{ ave.humedad }} %</span>
+        <div class="specs-grid">
+          <div class="spec-card">
+            <h3><i class="fas fa-thermometer-half"></i> Temperatura</h3>
+            <div class="spec-item">
+              <span class="spec-label">Requerida</span>
+              <span class="spec-value temp-value">{{ ave.temperatura }} °C</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Actual</span>
+              <span class="spec-value temp-value">37.5 °C <i class="fas fa-check-circle" style="color: var(--success-color);"></i></span>
+            </div>
           </div>
-          <div class="spec-item">
-            <span class="spec-label">Actual</span>
-            <span class="spec-value humidity-value">55 % <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i></span>
-          </div>
-        </div>
-        
-        <div class="spec-card">
-          <h3><i class="fas fa-calendar-alt"></i> Incubación</h3>
-          <div class="spec-item">
-            <span class="spec-label">Días requeridos</span>
-            <span class="spec-value days-value">{{ ave.dias_incubacion }} días</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Días transcurridos</span>
-            <span class="spec-value days-value">
-              {{ dias_transcurridos }} días 
-              {% if finalizado %}
-                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
-              {% else %}
-                <i class="fas fa-clock" style="color: var(--secondary-color);"></i>
-              {% endif %}
-            </span>
-          </div>          
           
+          <div class="spec-card">
+            <h3><i class="fas fa-tint"></i> Humedad</h3>
+            <div class="spec-item">
+              <span class="spec-label">Requerida</span>
+              <span class="spec-value humidity-value">{{ ave.humedad }} %</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Actual</span>
+              <span class="spec-value humidity-value">55 % <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i></span>
+            </div>
+          </div>
+          
+          <div class="spec-card">
+            <h3><i class="fas fa-calendar-alt"></i> Incubación</h3>
+            <div class="spec-item">
+              <span class="spec-label">Días requeridos</span>
+              <span class="spec-value days-value">{{ ave.dias_incubacion }} días</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Días transcurridos</span>
+              <span class="spec-value days-value">
+                {{ dias_transcurridos }} días 
+                {% if finalizado %}
+                  <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                {% else %}
+                  <i class="fas fa-clock" style="color: var(--secondary-color);"></i>
+                {% endif %}
+              </span>
+            </div>          
+          </div>
         </div>
-      </div>
+      {% else %}
+        <p style="color: var(--warning-color); font-weight: 600; font-size: 1.1rem; margin-top: 20px;">
+          Inicia un ciclo primero para ver las especificaciones del huevo.
+        </p>
+      {% endif %}
+    </div>
+    
+    </div>
+  </div>
+  <div id="modalAve" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h3>Selecciona el tipo de ave</h3>
+      <select id="tipoAveSelect">
+        <option value="">-- Selecciona un ave --</option>
+        {% for ave in aves %}
+          <option value="{{ ave._id }}">{{ ave.nombre }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary" style="margin-top: 15px;" onclick="seleccionarAve()">Confirmar</button>
     </div>
   </div>
   <div id="incubadora" data-id="{{ incubadora._id }}" style="display:none;"></div>

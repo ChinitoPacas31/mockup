@@ -152,3 +152,47 @@ function toggleEstado(id) {
     alert('Error en la petición.');
   });
   }
+
+// Mostrar el modal al hacer clic en el estado
+function toggleEstado(incubadoraId) {
+  document.getElementById('incubadora').setAttribute('data-id', incubadoraId);
+  document.getElementById('modalAve').style.display = 'block';
+}
+
+// Cerrar el modal
+function cerrarModal() {
+  document.getElementById('modalAve').style.display = 'none';
+}
+
+// Confirmar la selección del ave
+async function seleccionarAve() {
+  const aveId = document.getElementById('tipoAveSelect').value;
+  const incubadoraId = document.getElementById('incubadora').getAttribute('data-id');
+
+  if (!aveId) {
+    alert("Selecciona un tipo de ave.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/incubadora/${incubadoraId}/asignar-ave`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ave_id: aveId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Ave asignada correctamente.");
+      location.reload();
+    } else {
+      alert("Error: " + data.message);
+    }
+  } catch (err) {
+    console.error("Error en la solicitud:", err);
+    alert("Error inesperado.");
+  }
+
+  cerrarModal();
+}
