@@ -10,6 +10,8 @@ import IncubadorasScreen from './screens/IncubadoraScreen';
 import HomeScreen from './screens/HomeScreen';
 import AgregarIncubadora from './screens/AgregarIncubadoraScreen';
 import DetalleIncubadora from './screens/DetalleIncubadoraScreen';
+import PerfilScreen from './screens/PerfilScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -27,6 +29,7 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AgregarIncubadora" component={AgregarIncubadora} />
         <Stack.Screen name="DetalleIncubadora" component={DetalleIncubadora} />
+        <Stack.Screen name="Perfil" component={PerfilScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

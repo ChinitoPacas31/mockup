@@ -132,7 +132,7 @@ def api_add_incubadora():
         "nombre": data["nombre"],
         "ubicacion": data["ubicacion"],
         "activa": False,
-        "inicio_activacion": None, 
+        "inicio_activacion": None,
         "usuario_id": ObjectId(user_id),
         "ave_id": ObjectId(ave_id)
     })
@@ -531,6 +531,67 @@ def exportar_registros(incubadora_id):
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment;filename={filename}"}
     )
+
+@app.route('/api/perfil/<user_id>', methods=['GET'])
+def api_get_perfil(user_id):
+    user = usuarios_col.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        return jsonify({"success": False, "message": "Usuario no encontrado"}), 404
+
+    return jsonify({
+        "success": True,
+        "nombre": user.get("nombre"),
+        "email": user.get("email"),
+        "imagen_perfil": user.get("imagen_perfil", None)
+    })
+
+@app.route('/api/perfil/<user_id>', methods=['PUT'])
+def api_editar_perfil(user_id):
+    data = request.json
+    nombre = data.get("nombre")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not all([nombre, email, password]):
+        return jsonify({"success": False, "message": "Faltan campos"}), 400
+
+    usuarios_col.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "nombre": nombre,
+            "email": email,
+            "password": password
+        }}
+    )
+    return jsonify({"success": True, "message": "Perfil actualizado"})
+
+@app.route('/api/perfil/<user_id>/imagen', methods=['POST'])
+def api_cambiar_imagen_perfil(user_id):
+    if 'imagen' not in request.files:
+        return jsonify({"success": False, "message": "No se envió imagen"}), 400
+
+    archivo = request.files['imagen']
+
+    if archivo.filename == '' or not allowed_file(archivo.filename):
+        return jsonify({"success": False, "message": "Formato no permitido"}), 400
+
+    filename = secure_filename(archivo.filename).replace(" ", "_")
+    filename = f"{user_id}_{filename}"
+    ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    try:
+        archivo.save(ruta)
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al guardar: {e}"}), 500
+
+    ruta_relativa = f"/static/uploads/{filename}"
+    usuarios_col.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"imagen_perfil": ruta_relativa}}
+    )
+
+    return jsonify({"success": True, "imagen_perfil": ruta_relativa})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

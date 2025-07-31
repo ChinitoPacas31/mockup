@@ -158,7 +158,15 @@ export default function IncubadorasScreen({ route, navigation }) {
       <View style={styles.container}>
         {/* Header con nuevo diseño */}
         <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => navigation.navigate('Perfil', { userId })}
+          >
+            <Ionicons name="person" size={24} color="#FFF" />
+          </TouchableOpacity>
+
           <Text style={styles.title}>Mis Incubadoras</Text>
+
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
@@ -467,4 +475,13 @@ const styles = StyleSheet.create({
     color: '#4A5568',
     fontSize: 14,
   },
+  profileButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+
 });
