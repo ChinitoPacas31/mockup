@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from flask import Response
 import csv
 import io
+from PIL import Image
+import pillow_heif
 
 load_dotenv()
 
@@ -22,7 +24,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'heic'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -572,19 +574,45 @@ def api_cambiar_imagen_perfil(user_id):
 
     archivo = request.files['imagen']
 
-    if archivo.filename == '' or not allowed_file(archivo.filename):
+    if archivo.filename == '':
+        return jsonify({"success": False, "message": "Archivo sin nombre"}), 400
+
+    ext = archivo.filename.rsplit('.', 1)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
         return jsonify({"success": False, "message": "Formato no permitido"}), 400
 
-    filename = secure_filename(archivo.filename).replace(" ", "_")
-    filename = f"{user_id}_{filename}"
-    ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    filename_base = secure_filename(archivo.filename).rsplit('.', 1)[0].replace(" ", "_")
+    filename = f"{user_id}_{filename_base}"
+
+    # Ruta para guardar temporalmente
+    ruta_temporal = os.path.join(app.config['UPLOAD_FOLDER'], f"{filename}.{ext}")
 
     try:
-        archivo.save(ruta)
+        archivo.save(ruta_temporal)
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al guardar: {e}"}), 500
 
-    ruta_relativa = f"/static/uploads/{filename}"
+    # Si es HEIC, convierte a JPG
+    if ext == 'heic':
+        try:
+            heif_file = pillow_heif.read_heif(ruta_temporal)
+            image = Image.frombytes(
+                heif_file.mode,
+                heif_file.size,
+                heif_file.data,
+                "raw"
+            )
+            filename_jpg = f"{filename}.jpg"
+            ruta_jpg = os.path.join(app.config['UPLOAD_FOLDER'], filename_jpg)
+            image.save(ruta_jpg, "JPEG")
+            os.remove(ruta_temporal)  # Borra el archivo HEIC original
+            ruta_relativa = f"/static/uploads/{filename_jpg}"
+        except Exception as e:
+            return jsonify({"success": False, "message": f"Error al convertir HEIC a JPG: {e}"}), 500
+    else:
+        # Si no es HEIC, usa el archivo guardado
+        ruta_relativa = f"/static/uploads/{filename}.{ext}"
+
     usuarios_col.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {"imagen_perfil": ruta_relativa}}
