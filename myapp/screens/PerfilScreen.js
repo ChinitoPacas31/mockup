@@ -6,10 +6,11 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '../config';
 
 export default function PerfilScreen({ route, navigation }) {
@@ -18,18 +19,57 @@ export default function PerfilScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/perfil/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setPerfil(data);
-        }
-      })
-      .catch((err) => console.log(err))
-      .finally(() => setLoading(false));
+    cargarPerfil();
+    const unsubscribe = navigation.addListener('focus', cargarPerfil);
+    return unsubscribe;
   }, []);
 
-  if (loading || !perfil) {
+  const cargarPerfil = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/perfil/${userId}`);
+      const data = await res.json();
+      if (data.success) {
+        setPerfil(data);
+      } else {
+        Alert.alert('Error', 'No se pudo cargar el perfil');
+      }
+    } catch (error) {
+      console.log('Error cargando perfil:', error);
+      Alert.alert('Error', 'Ocurrió un error al cargar el perfil');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro que quieres cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Borra solo las keys necesarias de sesión:
+              await AsyncStorage.multiRemove(['userToken', 'userId']);
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } catch (e) {
+              console.log('Error al cerrar sesión:', e);
+              Alert.alert('Error', 'No se pudo cerrar sesión correctamente');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6C63FF" />
@@ -38,37 +78,35 @@ export default function PerfilScreen({ route, navigation }) {
     );
   }
 
+  if (!perfil) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>No se encontró el perfil</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.profileButton}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-
         <Text style={styles.title}>Mi Perfil</Text>
-
         <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => {
-            /* Aquí podrías poner logout o alguna acción */
-            // navigation.navigate('LogoutScreen')
-            alert('Cerrar sesión (implementa acción)');
-          }}
+          style={styles.logoutButton}
+          onPress={logout}
         >
           <Ionicons name="log-out-outline" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      {/* Foto de Perfil */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          <FontAwesome5 name="image" size={18} /> Foto de Perfil
-        </Text>
-
+      {/* Foto de perfil */}
+      <View style={styles.profileImageContainer}>
         <Image
           source={
             perfil.imagen_perfil
@@ -77,100 +115,40 @@ export default function PerfilScreen({ route, navigation }) {
           }
           style={styles.avatar}
         />
-
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>
-            <FontAwesome5 name="upload" size={14} /> Cambiar imagen
-          </Text>
+        <TouchableOpacity
+          style={styles.changeImageButton}
+          onPress={() => navigation.navigate('CambiarImagen', { userId })}
+        >
+          <Ionicons name="camera" size={20} color="#FFF" />
+          <Text style={styles.changeImageText}>Cambiar imagen</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Información Personal */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          <FontAwesome5 name="id-card" size={18} /> Información Personal
-        </Text>
+      {/* Información personal */}
+      <View style={styles.infoCard}>
+        <Text style={styles.infoTitle}>Información Personal</Text>
 
         <View style={styles.infoRow}>
-          <FontAwesome5 name="user-tag" size={16} color="#4A5568" />
-          <Text style={styles.infoLabel}>Nombre:</Text>
-          <Text style={styles.infoValue}>{perfil.nombre}</Text>
+          <Ionicons name="person" size={20} color="#6C63FF" />
+          <Text style={styles.infoText}>{perfil.nombre}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <FontAwesome5 name="envelope" size={16} color="#4A5568" />
-          <Text style={styles.infoLabel}>Email:</Text>
-          <Text style={styles.infoValue}>{perfil.email}</Text>
+          <Ionicons name="mail" size={20} color="#6C63FF" />
+          <Text style={styles.infoText}>{perfil.email}</Text>
         </View>
 
         <TouchableOpacity
-          style={styles.button}
+          style={styles.editProfileButton}
           onPress={() => navigation.navigate('EditarPerfil', { userId })}
         >
-          <Text style={styles.buttonText}>
-            <FontAwesome5 name="edit" size={14} /> Editar Perfil
-          </Text>
+          <Ionicons name="create-outline" size={20} color="#FFF" />
+          <Text style={styles.editProfileText}>Editar Perfil</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Resumen de Actividad */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          <FontAwesome5 name="chart-line" size={18} /> Resumen de Actividad
-        </Text>
-
-        <View style={styles.infoRow}>
-          <FontAwesome5 name="egg" size={16} color="#4A5568" />
-          <Text style={styles.infoLabel}>Incubadoras registradas:</Text>
-          <Text style={styles.infoValue}>{perfil.total_incubadoras || 0}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <FontAwesome5 name="history" size={16} color="#4A5568" />
-          <Text style={styles.infoLabel}>Última incubadora:</Text>
-          <Text style={styles.infoValue}>{perfil.ultima_incubadora || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <FontAwesome5 name="calendar-alt" size={16} color="#4A5568" />
-          <Text style={styles.infoLabel}>Miembro desde:</Text>
-          <Text style={styles.infoValue}>{perfil.fecha_registro || 'N/A'}</Text>
-        </View>
-      </View>
-
-      {/* Acceso rápido */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          <FontAwesome5 name="bolt" size={18} /> Acceso rápido
-        </Text>
-
-        <View style={styles.quickLinks}>
-          <TouchableOpacity
-            style={styles.quickButton}
-            onPress={() => navigation.navigate('Incubadoras', { userId })}
-          >
-            <FontAwesome5 name="egg" size={16} color="#fff" />
-            <Text style={styles.quickText}>Mis Incubadoras</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.quickButton}
-            onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
-          >
-            <FontAwesome5 name="plus-circle" size={16} color="#fff" />
-            <Text style={styles.quickText}>Agregar Incubadora</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.quickButton}>
-            <FontAwesome5 name="headset" size={16} color="#fff" />
-            <Text style={styles.quickText}>Soporte</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+    </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -188,30 +166,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  errorText: {
+    flex: 1,
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 18,
+    color: 'red',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
     paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     backgroundColor: '#6C63FF',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    marginBottom: 20,
     shadowColor: '#6C63FF',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 20,
     elevation: 10,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFF',
-    flex: 1,
-    textAlign: 'center',
-  },
-  profileButton: {
+  backButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -219,80 +197,85 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginHorizontal: 20,
-    padding: 16,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  logoutButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  cardTitle: {
-    fontWeight: '600',
-    fontSize: 18,
-    marginBottom: 12,
-    color: '#2D3748',
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  profileImageContainer: {
+    marginTop: 30,
+    alignItems: 'center',
   },
   avatar: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    alignSelf: 'center',
-    marginBottom: 12,
-    borderWidth: 2,
     borderColor: '#6C63FF',
+    borderWidth: 3,
+  },
+  changeImageButton: {
+    flexDirection: 'row',
+    marginTop: 10,
+    backgroundColor: '#6C63FF',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  changeImageText: {
+    color: '#FFF',
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  infoCard: {
+    marginTop: 40,
+    backgroundColor: '#FFF',
+    marginHorizontal: 20,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6C63FF',
+    marginBottom: 20,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    gap: 6,
+    marginBottom: 16,
   },
-  infoLabel: {
-    fontWeight: '600',
-    marginLeft: 6,
+  infoText: {
+    marginLeft: 12,
+    fontSize: 16,
     color: '#2D3748',
   },
-  infoValue: {
-    marginLeft: 6,
-    color: '#4A5568',
-    flexShrink: 1,
-  },
-  button: {
-    backgroundColor: '#6C63FF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
+  editProfileButton: {
     marginTop: 10,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: '600',
-  },
-  quickLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  quickButton: {
-    flexDirection: 'row',
     backgroundColor: '#6C63FF',
     paddingVertical: 12,
-    paddingHorizontal: 15,
     borderRadius: 12,
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
-    marginHorizontal: 5,
+    alignItems: 'center',
   },
-  quickText: {
+  editProfileText: {
     color: '#FFF',
     fontWeight: '600',
-    fontSize: 14,
+    marginLeft: 8,
+    fontSize: 16,
   },
 });
