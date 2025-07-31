@@ -49,10 +49,10 @@
               <div class="incubadora-details">
                 <span><i class="fas fa-map-marker-alt"></i> {{ i.ubicacion }}</span>
                 <span><i class="fas fa-barcode"></i> {{ i.codigo }}</span>
-                <span id="estado-{{ i.id }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" onclick="toggleIncubadora('{{ i.id }}')">
+                <span id="estado-{{ i.id }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" style="cursor: default;">
                   <i class="fas fa-{{ 'check-circle' if i.activa else 'times-circle' }}"></i> 
                   {{ "Activa" if i.activa else "Inactiva" }}
-                </span>
+                </span>                
                 
               </div>
             </div>

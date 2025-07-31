@@ -3,7 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from flask import flash
 from dotenv import load_dotenv
@@ -131,7 +131,8 @@ def api_add_incubadora():
         "codigo": codigo,
         "nombre": data["nombre"],
         "ubicacion": data["ubicacion"],
-        "activa": True,
+        "activa": False,
+        "inicio_activacion": None, 
         "usuario_id": ObjectId(user_id),
         "ave_id": ObjectId(ave_id)
     })
@@ -342,7 +343,8 @@ def incubadoras():
             "codigo": codigo,
             "nombre": data["nombre"],
             "ubicacion": data["ubicacion"],
-            "activa": True,
+            "activa": False,
+            "inicio_activacion": None,
             "usuario_id": ObjectId(session["user_id"]),
             "ave_id": ObjectId(ave_id)
         })
@@ -379,7 +381,33 @@ def ver_incubadora(id):
         return "Incubadora no encontrada", 404
 
     ave = aves_col.find_one({"_id": incubadora.get("ave_id")})
-    return render_template('incubadora_detalle.html', incubadora=incubadora, ave=ave)
+
+    dias_transcurridos = 0
+    finalizado = False
+    inicio = incubadora.get("inicio_activacion")
+
+    if incubadora.get("activa") and inicio:
+        ahora_utc = datetime.now(timezone.utc).date()
+        inicio_utc = inicio.astimezone(timezone.utc).date()
+        dias_transcurridos = (inicio_utc - ahora_utc).days
+        finalizado = dias_transcurridos >= ave["dias_incubacion"]
+
+        # 👇 Aquí actualizamos la incubadora si ya terminó
+        if finalizado:
+            incubadoras_col.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": {"activa": False}}
+            )
+            # También puedes recargar la variable si quieres:
+            incubadora["activa"] = False
+
+    return render_template(
+        "incubadora_detalle.html",
+        incubadora=incubadora,
+        ave=ave,
+        dias_transcurridos=dias_transcurridos,
+        finalizado=finalizado
+    )
 
 @app.route('/incubadora/<id>/registros')
 def registros_incubadora(id):
@@ -463,8 +491,15 @@ def toggle_incubadora(id):
     if not incubadora:
         return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
 
-    nueva_activa = not incubadora.get("activa", True)
-    incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": {"activa": nueva_activa}})
+    nueva_activa = not incubadora.get("activa", False)
+
+    actualizacion = {"activa": nueva_activa}
+    if nueva_activa:
+        actualizacion["inicio_activacion"] = datetime.now()
+    else:
+        actualizacion["inicio_activacion"] = None
+
+    incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": actualizacion})
     
     return jsonify({"success": True, "activa": nueva_activa})
 

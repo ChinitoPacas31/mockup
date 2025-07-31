@@ -119,8 +119,16 @@
           </div>
           <div class="spec-item">
             <span class="spec-label">Días transcurridos</span>
-            <span class="spec-value days-value">12 días <i class="fas fa-clock" style="color: var(--secondary-color);"></i></span>
-          </div>
+            <span class="spec-value days-value">
+              {{ dias_transcurridos }} días 
+              {% if finalizado %}
+                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+              {% else %}
+                <i class="fas fa-clock" style="color: var(--secondary-color);"></i>
+              {% endif %}
+            </span>
+          </div>          
+          
         </div>
       </div>
     </div>
