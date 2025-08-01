@@ -385,6 +385,65 @@ def incubadoras():
         })
     return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"))
 
+@app.route('/api/incubadora-detalle/<incubadora_id>', methods=['GET'])
+def get_incubadora_detalle(incubadora_id):
+    try:
+        incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+        
+        ave = None
+        dias_transcurridos = 0
+        finalizado = False
+        
+        if incubadora.get("ave_id"):
+            ave = aves_col.find_one({"_id": incubadora["ave_id"]})
+            
+            if incubadora.get("activa") and incubadora.get("inicio_activacion"):
+                ahora_utc = datetime.now(timezone.utc)
+                inicio_utc = incubadora["inicio_activacion"].astimezone(timezone.utc)
+                
+                # Cálculo CORRECTO de días transcurridos
+                diferencia =  inicio_utc - ahora_utc
+                dias_transcurridos = diferencia.days
+                
+                # Asegurarnos que no sea negativo (por si hay problemas de zona horaria)
+                dias_transcurridos = max(0, dias_transcurridos)
+                
+                if ave and dias_transcurridos >= ave.get("dias_incubacion", 0):
+                    finalizado = True
+                    # Actualizar estado si finalizó
+                    incubadoras_col.update_one(
+                        {"_id": ObjectId(incubadora_id)},
+                        {"$set": {"activa": False}}
+                    )
+                    incubadora["activa"] = False
+
+        return jsonify({
+            "success": True,
+            "incubadora": {
+                "_id": str(incubadora["_id"]),
+                "codigo": incubadora["codigo"],
+                "nombre": incubadora["nombre"],
+                "ubicacion": incubadora["ubicacion"],
+                "activa": incubadora.get("activa", False),
+                "inicio_activacion": incubadora.get("inicio_activacion"),
+                "usuario_id": str(incubadora["usuario_id"]),
+                "ave_id": str(incubadora.get("ave_id")) if incubadora.get("ave_id") else None
+            },
+            "ave": {
+                "_id": str(ave["_id"]) if ave else None,
+                "nombre": ave["nombre"] if ave else None,
+                "dias_incubacion": ave.get("dias_incubacion") if ave else None,
+                "temperatura_ideal": ave.get("temperatura_ideal") if ave else None,
+                "humedad_ideal": ave.get("humedad_ideal") if ave else None
+            } if ave else None,
+            "dias_transcurridos": dias_transcurridos,
+            "finalizado": finalizado
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/incubadora/<id>')
 def ver_incubadora(id):
     if "user_id" not in session:
@@ -447,8 +506,17 @@ def registros_incubadora(id):
 
 @app.route('/api/aves', methods=['GET'])
 def api_get_aves():
-    aves = list(aves_col.find({}, {"nombre": 1}))
-    return jsonify([{"_id": str(ave["_id"]), "nombre": ave["nombre"]} for ave in aves])
+    try:
+        aves = list(aves_col.find({}))
+        return jsonify([{
+            "_id": str(ave["_id"]),
+            "nombre": ave["nombre"],
+            "dias_incubacion": ave.get("dias_incubacion", 0),
+            "temperatura_ideal": ave.get("temperatura_ideal", 37.5),
+            "humedad_ideal": ave.get("humedad_ideal", 55)
+        } for ave in aves])
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/incubadora/<incubadora_id>', methods=['GET'])
 def api_get_incubadora(incubadora_id):
@@ -523,10 +591,15 @@ def asignar_ave(id):
     data = request.get_json()
     ave_id = data.get('ave_id')
 
+    incubadora = incubadoras_col.find_one({'_id': ObjectId(id)})
+    if not incubadora:
+        return jsonify({'success': False, 'message': 'Incubadora no encontrada'}), 404
+
     ave = aves_col.find_one({'_id': ObjectId(ave_id)})
     if not ave:
         return jsonify({'success': False, 'message': 'Ave no encontrada'}), 404
 
+    # Actualizar incubadora con el ave seleccionada y activar
     incubadoras_col.update_one(
         {'_id': ObjectId(id)},
         {
@@ -543,9 +616,42 @@ def asignar_ave(id):
         'nombre_ave': ave['nombre'],
         'dias_incubacion': ave['dias_incubacion'],
         'temperatura': ave.get('temperatura_ideal', ''),
-        'humedad': ave.get('humedad_ideal', '')
+        'humedad': ave.get('humedad_ideal', ''),
+        'inicio_activacion': datetime.now().isoformat()
     })
 
+@app.route("/api/incubadora/<id>/apagar", methods=["POST"])
+def off_incubadora(id):
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
+    if not incubadora:
+        return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
+
+    # Reiniciar todos los valores
+    incubadoras_col.update_one({"_id": ObjectId(id)}, {
+        "$set": {
+            "activa": False,
+            "inicio_activacion": None,
+            "ave_id": None
+        }
+    })
+    
+    return jsonify({"success": True, "message": "Incubadora apagada correctamente"})
+
+@app.route("/apagar-incubadora/<id>", methods=["POST"])
+def apagar_incubadora(id):
+    user_id = ObjectId(session["user_id"])
+    incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
+    if not incubadora:
+        return jsonify({"error": "Incubadora no encontrada"}), 404
+
+    incubadoras_col.update_one({"_id": ObjectId(id)}, {
+        "$set": {
+            "activa": False,
+            "inicio_activacion": None,
+            "ave_id": None  # Opcional: reiniciar el ave seleccionada
+        }
+    })
+    return jsonify({"message": "Apagada correctamente"}), 200
 
 @app.route('/exportar-registros/<incubadora_id>')
 def exportar_registros(incubadora_id):
@@ -661,23 +767,6 @@ def api_cambiar_imagen_perfil(user_id):
     )
 
     return jsonify({"success": True, "imagen_perfil": ruta_relativa})
-
-@app.route("/apagar-incubadora/<id>", methods=["POST"])
-def apagar_incubadora(id):
-    user_id = ObjectId(session["user_id"])
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
-    if not incubadora:
-        return jsonify({"error": "Incubadora no encontrada"}), 404
-
-    incubadoras_col.update_one({"_id": ObjectId(id)}, {
-        "$set": {
-            "activa": False,
-            "inicio_activacion": None,
-            "ave_id": None  # Opcional: reiniciar el ave seleccionada
-        }
-    })
-    return jsonify({"message": "Apagada correctamente"}), 200
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
