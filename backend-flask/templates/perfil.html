@@ -27,105 +27,111 @@
 
   <main class="profile-main">
     <div class="container profile-container">
-      
-      <!-- Imagen de perfil -->
-<div class="profile-card profile-image-card">
-  <div class="card-header">
-    <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
-  </div>
-  <div class="card-body" style="text-align: center;">
-    {% if imagen_perfil %}
-      <img src="{{ imagen_perfil }}" alt="Imagen de perfil" style="max-width:150px; border-radius:50%;" />
-    {% else %}
-      <img src="/static/images/default_profile.png" alt="Imagen por defecto" style="max-width:150px; border-radius:50%;" />
-    {% endif %}
-    <div style="margin-top: 10px;">
-      <!-- Cambiar imagen -->
-<a href="{{ url_for('cambiar_imagen') }}" class="btn btn-gradient">
-  <i class="fas fa-upload"></i> Cambiar imagen
-</a>
-    </div>
-  </div>
-</div>
-
-
-      <!-- Información personal -->
-      <div class="profile-card">
-        <div class="card-header">
-          <h2><i class="fas fa-id-card"></i> Información Personal</h2>
+      <!-- Sección superior con imagen y datos personales -->
+      <div class="profile-top-section">
+        <!-- Imagen de perfil -->
+        <div class="profile-card profile-image-card">
+          <div class="card-header">
+            <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
+          </div>
+          <div class="card-body" style="text-align: center;">
+            {% if imagen_perfil %}
+              <img src="{{ imagen_perfil }}" alt="Imagen de perfil" style="max-width:150px; border-radius:50%;" />
+            {% else %}
+              <img src="/static/images/default_profile.png" alt="Imagen por defecto" style="max-width:150px; border-radius:50%;" />
+            {% endif %}
+            <div style="margin-top: 10px;">
+              <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-gradient">
+                <i class="fas fa-upload"></i> Cambiar imagen
+              </a>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="profile-info-item">
-            <i class="fas fa-user-tag"></i>
-            <div>
-              <span class="info-label">Nombre:</span>
-              <span class="info-value">{{ nombre }}</span>
-            </div>
+
+        <!-- Información personal -->
+        <div class="profile-card">
+          <div class="card-header">
+            <h2><i class="fas fa-id-card"></i> Información Personal</h2>
           </div>
-          <div class="profile-info-item">
-            <i class="fas fa-envelope"></i>
-            <div>
-              <span class="info-label">Email:</span>
-              <span class="info-value">{{ email }}</span>
+          <div class="card-body">
+            <div class="profile-info-item">
+              <i class="fas fa-user-tag"></i>
+              <div>
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{ nombre }}</span>
+              </div>
             </div>
-          </div>
-          <div style="margin-top: 15px;">
-            <!-- Editar perfil -->
-<a href="{{ url_for('editar_perfil') }}" class="btn btn-gradient">
-  <i class="fas fa-edit"></i> Editar Perfil
-</a>
+            <div class="profile-info-item">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ email }}</span>
+              </div>
+            </div>
+            <div style="margin-top: 15px;">
+              <a href="{{ url_for('editar_perfil') }}" class="btn btn-gradient">
+                <i class="fas fa-edit"></i> Editar Perfil
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Actividad -->
+      <!-- Sección de actividad -->
       <div class="profile-card">
         <div class="card-header">
           <h2><i class="fas fa-chart-line"></i> Resumen de Actividad</h2>
         </div>
-        <div class="card-body">
-          <div class="profile-info-item">
-            <i class="fas fa-egg"></i>
-            <div>
-              <span class="info-label">Incubadoras registradas:</span>
-              <span class="info-value">{{ total_incubadoras }}</span>
+        <div class="card-body activity-grid">
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-egg"></i>
+            </div>
+            <div class="activity-content">
+              <h3>Incubadoras registradas</h3>
+              <p>{{ total_incubadoras }}</p>
             </div>
           </div>
-          <div class="profile-info-item">
-            <i class="fas fa-history"></i>
-            <div>
-              <span class="info-label">Última incubadora:</span>
-              <span class="info-value">{{ ultima_incubadora }}</span>
+          
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-history"></i>
+            </div>
+            <div class="activity-content">
+              <h3>Última incubadora</h3>
+              <p>{{ ultima_incubadora }}</p>
             </div>
           </div>
-          <div class="profile-info-item">
-            <i class="fas fa-calendar-alt"></i>
-            <div>
-              <span class="info-label">Miembro desde:</span>
-              <span class="info-value">{{ fecha_registro }}</span>
+          
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="activity-content">
+              <h3>Miembro desde</h3>
+              <p>Junio 2025</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Acceso rápido -->
-      <div class="profile-card" style="margin-top: 20px;">
+      <div class="profile-card quick-actions-card">
         <div class="card-header">
           <h2><i class="fas fa-bolt"></i> Acceso rápido</h2>
         </div>
-        <div class="card-body" style="display: flex; gap: 15px; flex-wrap: wrap;">
-          <a href="/incubadoras" class="btn btn-gradient">
-            <i class="fas fa-egg" aria-hidden="true"></i> Mis Incubadoras
+        <div class="card-body quick-actions-grid">
+          <a href="/incubadoras" class="btn btn-gradient action-btn">
+            <i class="fas fa-egg"></i> Mis Incubadoras
           </a>
-          <a href="/incubadoras#formulario" class="btn btn-gradient">
+          <a href="/incubadoras#formulario" class="btn btn-gradient action-btn">
             <i class="fas fa-plus-circle"></i> Agregar Incubadora
           </a>
-          <a href="nestium@gmail.com" class="btn btn-outline" target="_blank">
-            <i class="fas fa-headset" aria-hidden="true"></i> Soporte
+          <a href="mailto:nestium@gmail.com" class="btn btn-outline action-btn">
+            <i class="fas fa-headset"></i> Soporte
           </a>
         </div>
       </div>
-
     </div>
   </main>
 </body>

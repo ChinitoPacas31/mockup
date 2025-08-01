@@ -8,7 +8,6 @@
   --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
   --gradient-primary: linear-gradient(90deg, #4361ee 0%, #5f2eea 100%);
-  
 }
 
 * {
@@ -90,22 +89,24 @@ body {
   z-index: 2;
 }
 
-/* Asegura que los botones sean clickeables en el header */
-.profile-actions a {
-  pointer-events: auto;
-}
-
 /* Contenido principal */
 .profile-main {
   padding-bottom: 60px;
 }
 
 .profile-container {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
+}
+
+/* Sección superior */
+.profile-top-section {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
 }
 
 /* Tarjetas de perfil */
@@ -179,6 +180,72 @@ body {
   font-size: 1.05rem;
 }
 
+/* Actividad */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(93, 120, 255, 0.05);
+  border-radius: 8px;
+}
+
+.activity-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  width: 50px;
+  height: 50px;
+  background: rgba(93, 120, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-content h3 {
+  font-size: 0.9rem;
+  color: var(--dark-color);
+  margin-bottom: 5px;
+}
+
+.activity-content p {
+  font-size: 1.1rem;
+  color: var(--secondary-color);
+  font-weight: 500;
+}
+
+/* Acceso rápido */
+.quick-actions-card {
+  margin-top: 0;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 15px;
+  text-align: center;
+  height: 100%;
+}
+
+.action-btn i {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
 /* Botones */
 .btn {
   display: inline-flex;
@@ -227,7 +294,7 @@ body {
 
 /* Botón degradado moderno */
 .btn-gradient {
-  background: var(--gradient-primary); /* Usa tu variable */
+  background: var(--gradient-primary);
   color: white;
   box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
   border: none;
@@ -252,7 +319,7 @@ body {
     font-size: 2.2rem;
   }
   
-  .profile-container {
+  .profile-top-section {
     grid-template-columns: 1fr;
   }
   
@@ -264,6 +331,14 @@ body {
   .btn {
     width: 100%;
     max-width: 250px;
+  }
+  
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
   }
 }
 
