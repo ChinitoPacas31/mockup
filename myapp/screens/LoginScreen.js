@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  TextInput, 
+  TouchableOpacity, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  KeyboardAvoidingView, 
+  Platform, 
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
 import API_BASE_URL from '../config';
@@ -11,6 +24,7 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    Keyboard.dismiss(); // Ocultar teclado al intentar login
     setLoading(true);
     setMensaje('');
     try {
@@ -34,95 +48,108 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-<View style={styles.innerContainer}>
-  {/* Logo con temática de incubadoras */}
-  <Image
-    source={require('../assets/logo.png')} // Cambia 'logo.png' por el nombre real de tu imagen
-    style={styles.logoIcon}
-    resizeMode="contain"
-  />
-        
-        <Text style={styles.title}>IncuboTech</Text>
-        <Text style={styles.subtitle}>Control de Incubadoras</Text>
-
-        <View style={styles.inputContainer}>
-          <Icon 
-            name="email" 
-            size={20} 
-            color="#718096" 
-            style={styles.inputIcon} 
-          />
-          <TextInput
-            placeholder="Correo electrónico"
-            placeholderTextColor="#A0AEC0"
-            onChangeText={setEmail}
-            value={email}
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-        
-        <View style={styles.inputContainer}>
-          <Icon 
-            name="lock" 
-            size={20} 
-            color="#718096" 
-            style={styles.inputIcon} 
-          />
-          <TextInput
-            placeholder="Contraseña"
-            placeholderTextColor="#A0AEC0"
-            onChangeText={setPassword}
-            value={password}
-            style={styles.input}
-            secureTextEntry
-          />
-        </View>
-
-        {mensaje ? (
-          <Text style={[
-            styles.messageText,
-            mensaje.includes('éxito') ? styles.successMessage : styles.errorMessage
-          ]}>
-            {mensaje}
-          </Text>
-        ) : null}
-
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.8}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Iniciar sesión</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.innerContainer}>
+            {/* Logo con temática de incubadoras */}
+            <Image
+              source={require('../assets/logo.png')}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
+            
+            <Text style={styles.subtitle}>Control de Incubadoras</Text>
 
-        <TouchableOpacity 
-          style={styles.forgotPassword}
-          onPress={() => navigation.navigate('RecuperarContraseña')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-        </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Icon 
+                name="email" 
+                size={20} 
+                color="#718096" 
+                style={styles.inputIcon} 
+              />
+              <TextInput
+                placeholder="Correo electrónico"
+                placeholderTextColor="#A0AEC0"
+                onChangeText={setEmail}
+                value={email}
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => this.passwordInput.focus()}
+                blurOnSubmit={false}
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Icon 
+                name="lock" 
+                size={20} 
+                color="#718096" 
+                style={styles.inputIcon} 
+              />
+              <TextInput
+                ref={(input) => { this.passwordInput = input; }}
+                placeholder="Contraseña"
+                placeholderTextColor="#A0AEC0"
+                onChangeText={setPassword}
+                value={password}
+                style={styles.input}
+                secureTextEntry
+                returnKeyType="go"
+                onSubmitEditing={handleLogin}
+              />
+            </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>¿No tienes una cuenta?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
-            <Text style={styles.footerLink}>Regístrate</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+            {mensaje ? (
+              <Text style={[
+                styles.messageText,
+                mensaje.includes('éxito') ? styles.successMessage : styles.errorMessage
+              ]}>
+                {mensaje}
+              </Text>
+            ) : null}
+
+            <TouchableOpacity 
+              style={[styles.button, loading && styles.buttonDisabled]} 
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.forgotPassword}
+              onPress={() => navigation.navigate('RecuperarContraseña')}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>¿No tienes una cuenta?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
+                <Text style={styles.footerLink}>Regístrate</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -131,18 +158,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
-  innerContainer: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
+  },
+  innerContainer: {
     paddingHorizontal: 30,
-    paddingBottom: 150,
+    paddingBottom: 50,
   },
   logoIcon: {
-  alignSelf: 'center',
-  marginBottom: -20,
-  width: 280,   // Ajusta el ancho aquí
-  height: 280,  // Ajusta el alto aquí
-},
+    alignSelf: 'center',
+    marginBottom: -20,
+    width: 280,
+    height: 200,
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
