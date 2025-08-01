@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -18,26 +18,11 @@ import API_BASE_URL from '../config';
 export default function AgregarIncubadora({ navigation, route }) {
   const { userId } = route.params;
   const [loading, setLoading] = useState(false);
-  const [aves, setAves] = useState([]);
   const [formData, setFormData] = useState({
     codigo: '',
     nombre: '',
-    ubicacion: '',
-    ave_id: ''
+    ubicacion: ''
   });
-
-  useEffect(() => {
-    const cargarAves = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/aves`);
-        setAves(res.data);
-      } catch (error) {
-        console.error('Error cargando aves:', error);
-        Alert.alert('Error', 'No se pudieron cargar los tipos de ave');
-      }
-    };
-    cargarAves();
-  }, []);
 
   const handleChange = (name, value) => {
     setFormData({
@@ -47,7 +32,7 @@ export default function AgregarIncubadora({ navigation, route }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.codigo || !formData.nombre || !formData.ubicacion || !formData.ave_id) {
+    if (!formData.codigo || !formData.nombre || !formData.ubicacion) {
       Alert.alert('Error', 'Todos los campos son obligatorios');
       return;
     }
@@ -57,7 +42,8 @@ export default function AgregarIncubadora({ navigation, route }) {
       await axios.post(`${API_BASE_URL}/api/incubadoras`, {
         ...formData,
         user_id: userId,
-        activa: true
+        activa: false,
+        ave_id: null  // Enviamos null ya que no se selecciona ave
       });
   
       Alert.alert('Éxito', 'Incubadora agregada correctamente', [
@@ -140,42 +126,6 @@ export default function AgregarIncubadora({ navigation, route }) {
               onChangeText={(text) => handleChange('ubicacion', text)}
               returnKeyType="done"
             />
-          </View>
-        </View>
-
-        {/* Tarjeta de tipo de ave */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardIcon}>
-              <Ionicons name="egg-outline" size={24} color="#6C63FF" />
-            </View>
-            <Text style={styles.cardTitle}>Tipo de Ave</Text>
-          </View>
-
-          <View style={styles.selectContainer}>
-            {aves.map(ave => (
-              <TouchableOpacity
-                key={ave._id}
-                style={[
-                  styles.aveOption,
-                  formData.ave_id === ave._id && styles.aveOptionSelected
-                ]}
-                onPress={() => handleChange('ave_id', ave._id)}
-                activeOpacity={0.7}
-              >
-                <Ionicons 
-                  name="egg" 
-                  size={20} 
-                  color={formData.ave_id === ave._id ? "#FFF" : "#6C63FF"} 
-                />
-                <Text style={[
-                  styles.aveOptionText,
-                  formData.ave_id === ave._id && styles.aveOptionTextSelected
-                ]}>
-                  {ave.nombre}
-                </Text>
-              </TouchableOpacity>
-            ))}
           </View>
         </View>
 
@@ -288,36 +238,6 @@ const styles = StyleSheet.create({
     color: '#2D3748',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-  },
-  selectContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  aveOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    width: '48%',
-  },
-  aveOptionSelected: {
-    backgroundColor: '#6C63FF',
-    borderColor: '#6C63FF',
-  },
-  aveOptionText: {
-    color: '#4A5568',
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  aveOptionTextSelected: {
-    color: '#FFFFFF',
   },
   submitButton: {
     backgroundColor: '#6C63FF',

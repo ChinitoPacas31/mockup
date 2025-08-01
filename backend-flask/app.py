@@ -117,10 +117,9 @@ def api_list_incubadoras(user_id):
 def api_add_incubadora():
     data = request.json
     user_id = data.get("user_id")
-    ave_id = data.get("ave_id")
     codigo = data.get("codigo")
 
-    if not all([user_id, ave_id, codigo]):
+    if not all([user_id, codigo]):
         return jsonify({"success": False, "message": "Datos incompletos"}), 400
 
     # Validar código
@@ -128,22 +127,21 @@ def api_add_incubadora():
     if not codigo_valido:
         return jsonify({"success": False, "message": "Código inválido o ya usado"}), 400
 
-    # Insertar incubadora
+    # Insertar incubadora sin ave_id
     incubadoras_col.insert_one({
         "codigo": codigo,
-        "nombre": data["nombre"],
-        "ubicacion": data["ubicacion"],
-        "activa": False,
+        "nombre": data.get("nombre", ""),
+        "ubicacion": data.get("ubicacion", ""),
+        "activa": False,  # Por defecto inactiva hasta que se asigne un ave
         "inicio_activacion": None,
         "usuario_id": ObjectId(user_id),
-        "ave_id": ObjectId(ave_id)
+        "ave_id": None  # Ya no es obligatorio al crear
     })
 
     # Marcar código como usado
     codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
 
     return jsonify({"success": True, "message": "Incubadora agregada"})
-
 
 # --- RUTAS WEB ---
 
