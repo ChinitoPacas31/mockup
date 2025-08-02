@@ -31,7 +31,7 @@ body {
 
 /* Header del perfil */
 .profile-header {
-  background: linear-gradient(135deg, var(--primary-color), #7a8fff);
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
   color: white;
   padding: 40px 0 15px;
   margin-bottom: 40px;

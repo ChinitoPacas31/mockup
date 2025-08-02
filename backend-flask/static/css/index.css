@@ -21,6 +21,13 @@
   box-sizing: border-box;
 }
 
+.navbar-logo {
+  height: 70px;
+  width: auto;
+  transition: var(--transition);
+  filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.2));
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   background-color: #f9f9f9;

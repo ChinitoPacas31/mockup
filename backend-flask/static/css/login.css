@@ -21,7 +21,7 @@
 
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f9fbfd;
+  background: linear-gradient(135deg, #5d78ff 0%, #6a11cb 100%);
   color: var(--dark-color);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
