@@ -15,6 +15,8 @@ import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
 import { Picker } from '@react-native-picker/picker';
 import API_BASE_URL from '../config';
+import { Image } from 'react-native';
+import { obtenerIconoAve } from '../avesConfig';
 
 export default function DetalleIncubadora({ route, navigation }) {
   const { incubadoraId, userId } = route.params;
@@ -201,6 +203,7 @@ const iniciarTemporizador = (diasIniciales) => {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+
 <Modal
   visible={showModalAve}
   animationType="slide"
@@ -221,12 +224,14 @@ const iniciarTemporizador = (diasIniciales) => {
             ]}
             onPress={() => setAveSeleccionada(ave._id)}
           >
-            <View style={styles.aveCircle}>
-              <Ionicons 
-                name="egg" 
-                size={24} 
-                color={aveSeleccionada === ave._id ? '#FFF' : '#6C63FF'} 
-              />
+            <View style={[
+              styles.aveCircle,
+              aveSeleccionada === ave._id && styles.aveCircleSelected
+            ]}>
+              <Image 
+              source={obtenerIconoAve(ave.nombre)} 
+              style={{ width: 40, height: 40, resizeMode: 'contain' }} 
+            />
             </View>
             <View style={styles.aveInfo}>
               <Text style={[
@@ -236,12 +241,15 @@ const iniciarTemporizador = (diasIniciales) => {
                 {ave.nombre}
               </Text>
               <Text style={styles.aveDays}>{ave.dias_incubacion} días de incubación</Text>
+              <Text style={styles.aveDetails}>
+                Temp: {ave.temperatura_ideal}°C - Hum: {ave.humedad_ideal}%
+              </Text>
             </View>
             {aveSeleccionada === ave._id && (
               <Ionicons 
                 name="checkmark-circle" 
                 size={24} 
-                color="#38A169" 
+                color="#6C63FF" 
                 style={styles.aveCheckmark}
               />
             )}
