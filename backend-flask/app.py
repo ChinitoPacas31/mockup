@@ -43,24 +43,58 @@ codigos_col = db.codigos_validos
 # --- Ruta para mandar los datos a la base --- 
 @app.route("/api/datos", methods=["POST"])
 def recibir_datos():
-    data = request.json
-    temperatura = data.get("temperatura")
-    humedad = data.get("humedad")
+    try:
+        data = request.json
+        temperatura = data.get("temperatura")
+        humedad = data.get("humedad")
+        incubadora_id = data.get("incubadora_id")  # Ahora usando incubadora_id
 
-    if temperatura is None or humedad is None:
-        return jsonify({"error": "Faltan datos"}), 400
+        # Validación de datos
+        if None in (temperatura, humedad, incubadora_id):
+            return jsonify({
+                "error": "Datos incompletos",
+                "detalle": "Se requieren temperatura, humedad e incubadora_id"
+            }), 400
 
-    registro = {
-        "fecha": datetime.now(),
-        "temperatura": temperatura,
-        "humedad": humedad
-    }
+        # Validar que incubadora_id sea un ObjectId válido
+        try:
+            object_id = ObjectId(incubadora_id)
+        except:
+            return jsonify({
+                "error": "ID de incubadora inválido",
+                "detalle": "El ID debe ser un ObjectId válido de 24 caracteres hexadecimales"
+            }), 400
 
-    registros_col.insert_one(registro)
-    return jsonify({"status": "ok"}), 201
+        # Crear registro
+        registro = {
+            "fecha": datetime.now(),
+            "temperatura": float(temperatura),
+            "humedad": float(humedad),
+            "incubadora_id": object_id  # Guardado como ObjectId
+        }
 
-from bson import ObjectId
-from pymongo.errors import PyMongoError
+        # Insertar en MongoDB
+        result = registros_col.insert_one(registro)
+        return jsonify({
+            "status": "ok",
+            "id": str(result.inserted_id)
+        }), 201
+
+    except ValueError as e:
+        return jsonify({
+            "error": "Error de formato",
+            "detalle": str(e)
+        }), 400
+    except PyMongoError as e:
+        return jsonify({
+            "error": "Error de base de datos",
+            "detalle": str(e)
+        }), 500
+    except Exception as e:
+        return jsonify({
+            "error": "Error interno",
+            "detalle": str(e)
+        }), 500
 
 @app.route('/api/control', methods=['GET'])
 def api_control():
@@ -530,21 +564,28 @@ def registros_incubadora(id):
     if "user_id" not in session:
         return redirect(url_for('login_form'))
 
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
-    if not incubadora:
-        return jsonify({"error": "Incubadora no encontrada"}), 404
+    try:
+        # Verificar que la incubadora existe y pertenece al usuario
+        incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
 
-    registros_cursor = registros_col.find({"incubadora_id": ObjectId(id)}).sort("fechaHora", 1)
+        # Obtener registros (usando "fecha" en lugar de "fechaHora")
+        registros_cursor = registros_col.find({"incubadora_id": ObjectId(id)}).sort("fecha", 1)
 
-    registros = []
-    for r in registros_cursor:
-        registros.append({
-            "fechaHora": r["fechaHora"].isoformat(),
-            "temperatura": r["temperatura"],
-            "humedad": r["humedad"]
-        })
+        registros = []
+        for r in registros_cursor:
+            registros.append({
+                "fecha": r["fecha"].isoformat() if "fecha" in r else None,
+                "temperatura": r["temperatura"],
+                "humedad": r["humedad"]
+            })
 
-    return jsonify(registros)
+        return jsonify(registros)
+
+    except Exception as e:
+        print(f"Error al obtener registros: {str(e)}")
+        return jsonify({"error": "Error al obtener registros"}), 500
 
 @app.route('/api/aves', methods=['GET'])
 def api_get_aves():
