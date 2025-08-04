@@ -96,19 +96,20 @@ def recibir_datos():
             "detalle": str(e)
         }), 500
 
-@app.route('/api/control', methods=['GET'])
+@app.route('/api/control', methods=['POST'])  # Cambiamos a POST
 def api_control():
     try:
-        INCUBADORA_ID_ESTATICO = "688abec19ca7fd5f1b6c9522"  # Reemplaza con tu ID real
+        data = request.json
+        incubadora_id = data.get("incubadora_id")
         
         # Debug: Imprime el ID para verificar
-        print(f"Buscando incubadora con ID: {INCUBADORA_ID_ESTATICO}")
+        print(f"Buscando incubadora con ID: {incubadora_id}")
         
         # Verifica si el ID es válido
-        if not ObjectId.is_valid(INCUBADORA_ID_ESTATICO):
-            return jsonify({"error": "ID de incubadora inválido"}), 400
+        if not incubadora_id or not ObjectId.is_valid(incubadora_id):
+            return jsonify({"error": "ID de incubadora inválido o faltante"}), 400
         
-        incubadora = incubadoras_col.find_one({"_id": ObjectId(INCUBADORA_ID_ESTATICO)})
+        incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
         
         if not incubadora:
             return jsonify({"error": "Incubadora no encontrada"}), 404
@@ -116,18 +117,13 @@ def api_control():
         # Debug: Imprime los datos de la incubadora
         print(f"Datos de la incubadora: {incubadora}")
         
-        # Construye la respuesta manualmente (sin usar jsonify)
         response_data = {
             "activa": incubadora.get("activa", False),
             "humedad_ideal": incubadora.get("humedad_ideal", 55),
             "temperatura_ideal": incubadora.get("temperatura_ideal", 37.5)
         }
         
-        return Response(
-            json.dumps(response_data, separators=(',', ':')),
-            mimetype='application/json',
-            status=200
-        )
+        return jsonify(response_data), 200
         
     except PyMongoError as e:
         print(f"Error de MongoDB: {str(e)}")
