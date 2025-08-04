@@ -615,12 +615,12 @@ def api_get_incubadora(incubadora_id):
 
 @app.route('/api/incubadora/<incubadora_id>/registros', methods=['GET'])
 def api_get_registros(incubadora_id):
-    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fechaHora", 1)
+    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fecha", 1)
     
     registros = []
     for r in registros_cursor:
         registros.append({
-            "fechaHora": r["fechaHora"].isoformat(),
+            "fecha": r["fecha"].isoformat(),
             "temperatura": r["temperatura"],
             "humedad": r["humedad"]
         })
@@ -636,15 +636,15 @@ def perfil_registros():
     # Ejemplo: obtén los últimos registros de todas las incubadoras del usuario
     registros = []
     for inc in incubadoras_col.find({"usuario_id": user_id}):
-        for reg in registros_col.find({"incubadora_id": inc["_id"]}).sort("fechaHora", -1).limit(1):
+        for reg in registros_col.find({"incubadora_id": inc["_id"]}).sort("fecha", -1).limit(1):
             registros.append({
-                "fechaHora": reg["fechaHora"].isoformat(),
+                "fecha": reg["fecha"].isoformat(),
                 "temperatura": reg.get("temperatura", 0),
                 "humedad": reg.get("humedad", 0),
                 "incubadora": inc["nombre"]
             })
     # Opcional: ordenar por fecha
-    registros.sort(key=lambda r: r["fechaHora"])
+    registros.sort(key=lambda r: r["fecha"])
     return jsonify(registros)
 
 @app.route('/api/incubadora/<id>/toggle', methods=['POST'])
@@ -755,7 +755,7 @@ def exportar_registros(incubadora_id):
     if not incubadora:
         return "Incubadora no encontrada", 404
 
-    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fechaHora", 1)
+    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fecha", 1)
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -763,7 +763,7 @@ def exportar_registros(incubadora_id):
 
     for r in registros_cursor:
         writer.writerow([
-            r.get("fechaHora").strftime('%Y-%m-%d %H:%M:%S') if r.get("fechaHora") else '',
+            r.get("fecha").strftime('%Y-%m-%d %H:%M:%S') if r.get("fecha") else '',
             r.get("temperatura", ''),
             r.get("humedad", '')
         ])
