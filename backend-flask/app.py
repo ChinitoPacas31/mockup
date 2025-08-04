@@ -12,6 +12,7 @@ import csv
 import io
 from PIL import Image
 import pillow_heif
+import json 
 
 load_dotenv()
 
@@ -57,6 +58,49 @@ def recibir_datos():
 
     registros_col.insert_one(registro)
     return jsonify({"status": "ok"}), 201
+
+from bson import ObjectId
+from pymongo.errors import PyMongoError
+
+@app.route('/api/control', methods=['GET'])
+def api_control():
+    try:
+        INCUBADORA_ID_ESTATICO = "688abec19ca7fd5f1b6c9522"  # Reemplaza con tu ID real
+        
+        # Debug: Imprime el ID para verificar
+        print(f"Buscando incubadora con ID: {INCUBADORA_ID_ESTATICO}")
+        
+        # Verifica si el ID es válido
+        if not ObjectId.is_valid(INCUBADORA_ID_ESTATICO):
+            return jsonify({"error": "ID de incubadora inválido"}), 400
+        
+        incubadora = incubadoras_col.find_one({"_id": ObjectId(INCUBADORA_ID_ESTATICO)})
+        
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+        
+        # Debug: Imprime los datos de la incubadora
+        print(f"Datos de la incubadora: {incubadora}")
+        
+        # Construye la respuesta manualmente (sin usar jsonify)
+        response_data = {
+            "activa": incubadora.get("activa", False),
+            "humedad_ideal": incubadora.get("humedad_ideal", 55),
+            "temperatura_ideal": incubadora.get("temperatura_ideal", 37.5)
+        }
+        
+        return Response(
+            json.dumps(response_data, separators=(',', ':')),
+            mimetype='application/json',
+            status=200
+        )
+        
+    except PyMongoError as e:
+        print(f"Error de MongoDB: {str(e)}")
+        return jsonify({"error": "Error de base de datos"}), 500
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # --- RUTAS API PARA APP MOVIL ---
 
@@ -637,19 +681,35 @@ def off_incubadora(id):
 
 @app.route("/apagar-incubadora/<id>", methods=["POST"])
 def apagar_incubadora(id):
-    user_id = ObjectId(session["user_id"])
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
-    if not incubadora:
-        return jsonify({"error": "Incubadora no encontrada"}), 404
+    # Verificar si el usuario está autenticado
+    if "user_id" not in session:
+        return jsonify({"error": "No autorizado: usuario no autenticado"}), 401
+    
+    try:
+        user_id = ObjectId(session["user_id"])
+        incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
+        
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada o no pertenece al usuario"}), 404
 
-    incubadoras_col.update_one({"_id": ObjectId(id)}, {
-        "$set": {
-            "activa": False,
-            "inicio_activacion": None,
-            "ave_id": None  # Opcional: reiniciar el ave seleccionada
-        }
-    })
-    return jsonify({"message": "Apagada correctamente"}), 200
+        # Actualizar estado
+        result = incubadoras_col.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {
+                "activa": False,
+                "inicio_activacion": None,
+                "ave_id": None
+            }}
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({"message": "Incubadora apagada correctamente"}), 200
+        else:
+            return jsonify({"error": "No se pudo actualizar la incubadora"}), 500
+            
+    except Exception as e:
+        print(f"Error al apagar incubadora: {str(e)}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 @app.route('/exportar-registros/<incubadora_id>')
 def exportar_registros(incubadora_id):
