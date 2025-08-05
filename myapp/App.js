@@ -13,6 +13,7 @@ import DetalleIncubadora from './screens/DetalleIncubadoraScreen';
 import PerfilScreen from './screens/PerfilScreen';
 import EditarPerfilScreen from './screens/EditarPerfilScreen';
 import CambiarImagenScreen from './screens/CambiarImagenScreen';
+import NotificacionesScreen from './screens/NotificacionesScreen';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,7 @@ export default function App() {
         <Stack.Screen name="Perfil" component={PerfilScreen} />
         <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="CambiarImagen" component={CambiarImagenScreen} />
+        <Stack.Screen name="Notificaciones" component={NotificacionesScreen} initialParams={{ userId: "defaultUserId" }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

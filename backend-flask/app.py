@@ -971,5 +971,143 @@ def exportRegistros(codigo):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/notificaciones/<user_id>', methods=['GET'])
+def get_notificaciones(user_id):
+    try:
+        # Usar agregación para incluir datos de la incubadora
+        notificaciones = list(db.notificaciones.aggregate([
+            {
+                "$match": {
+                    "user_id": ObjectId(user_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "incubadoras",
+                    "localField": "incubadora_id",
+                    "foreignField": "_id",
+                    "as": "incubadora_info"
+                }
+            },
+            {
+                "$addFields": {
+                    "nombre_incubadora": {
+                        "$ifNull": [
+                            "$nombre_incubadora",  # Usar el campo si ya existe
+                            {"$arrayElemAt": ["$incubadora_info.nombre", 0]}  # Obtener de la relación
+                        ]
+                    },
+                    "codigo_incubadora": {
+                        "$ifNull": [
+                            "$codigo_incubadora",
+                            {"$arrayElemAt": ["$incubadora_info.codigo", 0]}
+                        ]
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "fecha": -1  # Ordenar por fecha descendente
+                }
+            },
+            {
+                "$project": {
+                    "incubadora_info": 0  # Excluir el array completo de info de incubadora
+                }
+            }
+        ]))
+
+        return jsonify({
+            "success": True,
+            "notifications": [{
+                "_id": str(n["_id"]),
+                "titulo": n.get("titulo", ""),
+                "mensaje": n.get("mensaje", ""),
+                "tipo": n.get("tipo", "info"),
+                "fecha": n.get("fecha").isoformat() if n.get("fecha") else "",
+                "leida": n.get("leida", False),
+                "incubadora_id": str(n.get("incubadora_id")) if n.get("incubadora_id") else None,
+                "nombre_incubadora": n.get("nombre_incubadora"),
+                "codigo_incubadora": n.get("codigo_incubadora")
+            } for n in notificaciones]
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/notificaciones/marcar-leida', methods=['POST'])
+def marcar_notificacion_leida():
+    try:
+        data = request.json
+        db.notificaciones.update_one(
+            {"_id": ObjectId(data["notificationId"])},  # Aquí se cerró correctamente el paréntesis
+            {"$set": {"leida": True}}
+        )
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/notificaciones/marcar-todas-leidas', methods=['POST'])  # Asegúrate de que methods=['POST'] esté correctamente escrito
+def marcar_todas_leidas():
+    try:
+        data = request.get_json()  # Cambiado de request.json a request.get_json()
+        if not data or 'userId' not in data:
+            return jsonify({"success": False, "error": "Datos incompletos"}), 400
+        
+        user_id = ObjectId(data["userId"])
+        
+        result = db.notificaciones.update_many(
+            {"user_id": user_id, "leida": False},
+            {"$set": {"leida": True}}
+        )
+        
+        return jsonify({
+            "success": True,
+            "message": f"{result.modified_count} notificaciones marcadas como leídas"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/notificaciones/eliminar', methods=['DELETE'])
+def eliminar_notificacion():
+    try:
+        data = request.get_json()
+        notification_id = ObjectId(data["notificationId"])
+        user_id = ObjectId(data["userId"])
+        
+        result = db.notificaciones.delete_one({
+            "_id": notification_id,
+            "user_id": user_id
+        })
+        
+        if result.deleted_count == 1:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Notificación no encontrada"}), 404
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Eliminar todas las notificaciones del usuario
+@app.route('/api/notificaciones/eliminar-todas', methods=['DELETE'])
+def eliminar_todas_notificaciones():
+    try:
+        data = request.get_json()
+        user_id = ObjectId(data["userId"])
+        
+        result = db.notificaciones.delete_many({
+            "user_id": user_id
+        })
+        
+        return jsonify({
+            "success": True,
+            "deleted_count": result.deleted_count
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

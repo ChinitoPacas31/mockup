@@ -71,7 +71,7 @@ export default function IncubadorasScreen({ route, navigation }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('DetalleIncubadora', {
-        codigoIncubadora: item.codigo,  // Cambiado a codigoIncubadora
+        codigoIncubadora: item.codigo,
         userId: userId
       })}
       activeOpacity={0.9}
@@ -156,7 +156,7 @@ export default function IncubadorasScreen({ route, navigation }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        {/* Header con nuevo diseño */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.profileButton}
@@ -175,24 +175,33 @@ export default function IncubadorasScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for incubators..."
-            placeholderTextColor="#A0AEC0"
-            value={searchTerm}
-            onChangeText={(text) => {
-              setSearchTerm(text);
-              setCurrentPage(1);
-            }}
-          />
-          {searchTerm.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchTerm('')}>
-              <Ionicons name="close-circle" size={20} color="#A0AEC0" />
-            </TouchableOpacity>
-          )}
+        {/* Search Bar with Notifications */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search for incubators..."
+              placeholderTextColor="#A0AEC0"
+              value={searchTerm}
+              onChangeText={(text) => {
+                setSearchTerm(text);
+                setCurrentPage(1);
+              }}
+            />
+            {searchTerm.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchTerm('')}>
+                <Ionicons name="close-circle" size={20} color="#A0AEC0" />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <TouchableOpacity
+            style={styles.notificationsButton}
+            onPress={() => navigation.navigate('Notificaciones', { userId })}
+          >
+            <Ionicons name="notifications" size={24} color="#6C63FF" />
+          </TouchableOpacity>
         </View>
 
         {/* Stats Overview */}
@@ -234,7 +243,7 @@ export default function IncubadorasScreen({ route, navigation }) {
           <>
             <FlatList
               data={paginatedIncubadoras}
-              keyExtractor={(item) => item.codigo}  // Cambiado a usar codigo como key
+              keyExtractor={(item) => item.codigo}
               renderItem={renderItem}
               numColumns={2}
               columnWrapperStyle={styles.columnWrapper}
@@ -304,15 +313,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
+  profileButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#EDF2F7',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    marginRight: 10,
   },
   searchIcon: {
     marginRight: 10,
@@ -322,6 +345,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2D3748',
     paddingVertical: 0,
+  },
+  notificationsButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -474,13 +510,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     color: '#4A5568',
     fontSize: 14,
-  },
-  profileButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
   },
 });
