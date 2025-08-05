@@ -130,7 +130,7 @@ export default function IncubadorasScreen({ route, navigation }) {
         </TouchableOpacity>
         
         <Text style={styles.pageText}>
-          Página {currentPage} de {totalPages}
+          Page {currentPage} of {totalPages}
         </Text>
         
         <TouchableOpacity
