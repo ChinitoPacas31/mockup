@@ -39,22 +39,36 @@ export default function AgregarIncubadora({ navigation, route }) {
   
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/api/incubadoras`, {
-        ...formData,
-        user_id: userId,
-        activa: false,
-        ave_id: null  // Enviamos null ya que no se selecciona ave
+      const response = await axios.post(`${API_BASE_URL}/api/incubadoras`, {
+        codigo: formData.codigo,
+        nombre: formData.nombre,
+        ubicacion: formData.ubicacion,
+        user_id: userId
       });
-  
-      Alert.alert('Éxito', 'Incubadora agregada correctamente', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        Alert.alert('Error', error.response.data.message);
+
+      if (response.data.success) {
+        Alert.alert('Éxito', 'Incubadora agregada correctamente', [
+          { 
+            text: 'OK', 
+            onPress: () => navigation.navigate('Incubadoras', { userId }) 
+          }
+        ]);
       } else {
-        Alert.alert('Error', 'No se pudo agregar la incubadora');
+        Alert.alert('Error', response.data.message || 'Error al agregar incubadora');
       }
+    } catch (error) {
+      console.error('Error al agregar incubadora:', error);
+      let errorMessage = 'Error al agregar incubadora';
+      
+      if (error.response) {
+        if (error.response.status === 400) {
+          errorMessage = error.response.data.message || 'Código inválido o ya existe';
+        } else if (error.response.status === 500) {
+          errorMessage = 'Error en el servidor';
+        }
+      }
+      
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -70,12 +84,11 @@ export default function AgregarIncubadora({ navigation, route }) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header con gradiente */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity 
             onPress={() => navigation.goBack()}
             style={styles.backButton}
-            activeOpacity={0.7}
           >
             <Ionicons name="arrow-back" size={24} color="#FFF" />
           </TouchableOpacity>
@@ -83,32 +96,35 @@ export default function AgregarIncubadora({ navigation, route }) {
           <View style={styles.headerRightPlaceholder} />
         </View>
 
-        {/* Tarjeta de información básica */}
+        {/* Formulario */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <View style={styles.cardIcon}>
-              <Ionicons name="information-circle-outline" size={24} color="#6C63FF" />
-            </View>
+            <Ionicons name="information-circle" size={24} color="#6C63FF" />
             <Text style={styles.cardTitle}>Información Básica</Text>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Código de la incubadora</Text>
+            <Text style={styles.label}>Código de Activación</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: INC-001"
+              placeholder="Ingresa el código de la incubadora"
               placeholderTextColor="#A0AEC0"
               value={formData.codigo}
               onChangeText={(text) => handleChange('codigo', text)}
+              autoCapitalize="characters"
+              autoCorrect={false}
               returnKeyType="next"
             />
+            <Text style={styles.hintText}>
+              Este código viene con tu dispositivo físico
+            </Text>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Nombre descriptivo</Text>
+            <Text style={styles.label}>Nombre</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Mi incubadora principal"
+              placeholder="Ej: Incubadora Principal"
               placeholderTextColor="#A0AEC0"
               value={formData.nombre}
               onChangeText={(text) => handleChange('nombre', text)}
@@ -117,10 +133,10 @@ export default function AgregarIncubadora({ navigation, route }) {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Ubicación física</Text>
+            <Text style={styles.label}>Ubicación</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Sala de incubación, Granja norte"
+              placeholder="Ej: Sala de incubación, Granja"
               placeholderTextColor="#A0AEC0"
               value={formData.ubicacion}
               onChangeText={(text) => handleChange('ubicacion', text)}
@@ -131,16 +147,18 @@ export default function AgregarIncubadora({ navigation, route }) {
 
         {/* Botón de guardar */}
         <TouchableOpacity 
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]} 
+          style={[
+            styles.submitButton, 
+            loading && styles.submitButtonDisabled
+          ]}
           onPress={handleSubmit}
           disabled={loading}
-          activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator color="#FFF" size="small" />
+            <ActivityIndicator color="#FFF" />
           ) : (
             <>
-              <Ionicons name="save" size={20} color="#FFF" />
+              <Ionicons name="save-outline" size={20} color="#FFF" />
               <Text style={styles.submitButtonText}>Guardar Incubadora</Text>
             </>
           )}
@@ -157,11 +175,10 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 30,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
     paddingTop: 50,
@@ -169,85 +186,80 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     marginBottom: 20,
-    shadowColor: '#6C63FF',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   backButton: {
     padding: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 12,
   },
   title: {
-    fontSize: 22,
+    flex: 1,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFF',
-    flex: 1,
     textAlign: 'center',
   },
   headerRightPlaceholder: {
     width: 40,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: '#FFF',
+    borderRadius: 15,
     padding: 20,
     marginHorizontal: 20,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 5,
+    shadowRadius: 6,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
-  cardIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F4FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#2D3748',
+    marginLeft: 10,
   },
   formGroup: {
     marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    color: '#718096',
-    marginBottom: 8,
     fontWeight: '500',
+    color: '#4A5568',
+    marginBottom: 8,
   },
   input: {
     backgroundColor: '#F8F9FA',
-    padding: 16,
-    borderRadius: 12,
-    fontSize: 16,
-    color: '#2D3748',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    color: '#2D3748',
+  },
+  hintText: {
+    fontSize: 12,
+    color: '#718096',
+    marginTop: 5,
+    fontStyle: 'italic',
   },
   submitButton: {
     backgroundColor: '#6C63FF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 18,
-    borderRadius: 12,
+    padding: 16,
+    borderRadius: 10,
     marginHorizontal: 20,
-    marginTop: 10,
     shadowColor: '#6C63FF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -255,12 +267,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   submitButtonDisabled: {
-    backgroundColor: '#CBD5E0',
+    opacity: 0.7,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 10,
   },
 });

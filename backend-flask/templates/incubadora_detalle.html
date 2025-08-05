@@ -59,112 +59,91 @@
             <i class="fas fa-power-off"></i>
           </div>
           <div class="info-content">
-            <h3>Iniciar Ciclo</h3>
-            <p>
-              <button 
-  id="estado-{{ incubadora._id }}" 
-  class="btn {{ 'btn-disabled' if incubadora.activa else 'btn-danger' }}" 
-  {% if not incubadora.activa %}onclick="toggleEstado('{{ incubadora._id }}')" style="cursor: pointer;"{% endif %}
->
-  <i class="fas fa-{{ 'check-circle' if incubadora.activa else 'times-circle' }}"></i>
-  {{ "Iniciado" if incubadora.activa else "Iniciar" }}
-</button>
-
-
-              
-            </p>
-          </div>
-        </div>
-
-        {% if incubadora.activa %}
-        <div class="info-item">
-          <div class="info-icon">
-            <i class="fas fa-power-off"></i>
-          </div>
-          <div class="info-content">
             <h3>Estado</h3>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <button class="btn btn-danger" onclick="confirmarApagado('{{ incubadora._id }}')">
-                <i class="fas fa-power-off"></i> Apagar
-              </button>
+              {% if incubadora.activa %}
+                <button id="estado-incubadora" class="btn btn-danger" onclick="confirmarApagado('{{ incubadora.codigo }}')">
+                  <i class="fas fa-power-off"></i> Apagar
+                </button>
+              {% else %}
+                <button id="estado-incubadora" class="btn btn-success" onclick="iniciarCiclo()">
+                  <i class="fas fa-play"></i> Iniciar ciclo
+                </button>
+              {% endif %}
             </div>
           </div>
         </div>
-      {% endif %}
-      
-     
       </div>
 
       <div class="chart-container">
         <canvas id="incubationChart"></canvas>
       </div>
-      <div class="download-button" style="margin-top: 20px; text-align: right;">
-        <a href="/exportar-registros/{{ incubadora._id }}" class="btn btn-success" style="padding: 10px 20px; border-radius: 8px; background-color: #27ae60; color: white; text-decoration: none;">
-          <i class="fas fa-download"></i> Descargar CSV
-        </a>
-      </div>
-      
     </div>
 
     <div class="card">
       <h2><i class="fas fa-dove"></i> Especificaciones del Huevo</h2>
       
-      {% if ave and ave.nombre %}
-        <p style="margin-bottom: 20px; color: var(--secondary-color);">Configuración óptima para {{ ave.nombre }}</p>
-        
-        <div class="specs-grid">
-          <div class="spec-card">
-            <h3><i class="fas fa-thermometer-half"></i> Temperatura</h3>
-            <div class="spec-item">
-              <span class="spec-label">Requerida</span>
-              <span class="spec-value temp-value">{{ ave.temperatura }} °C</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Actual</span>
-              <span class="spec-value temp-value">37.5 °C <i class="fas fa-check-circle" style="color: var(--success-color);"></i></span>
-            </div>
-          </div>
+      {% if incubadora.activa %}
+        {% if ave and ave.nombre %}
+          <p style="margin-bottom: 20px; color: var(--secondary-color);">Configuración óptima para {{ ave.nombre }}</p>
           
-          <div class="spec-card">
-            <h3><i class="fas fa-tint"></i> Humedad</h3>
-            <div class="spec-item">
-              <span class="spec-label">Requerida</span>
-              <span class="spec-value humidity-value">{{ ave.humedad }} %</span>
+          <div class="specs-grid">
+            <div class="spec-card">
+              <h3><i class="fas fa-thermometer-half"></i> Temperatura</h3>
+              <div class="spec-item">
+                <span class="spec-label">Requerida</span>
+                <span class="spec-value temp-value">{{ ave.temperatura }} °C</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Actual</span>
+                <span class="spec-value temp-value">37.5 °C <i class="fas fa-check-circle" style="color: var(--success-color);"></i></span>
+              </div>
             </div>
-            <div class="spec-item">
-              <span class="spec-label">Actual</span>
-              <span class="spec-value humidity-value">55 % <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i></span>
+            
+            <div class="spec-card">
+              <h3><i class="fas fa-tint"></i> Humedad</h3>
+              <div class="spec-item">
+                <span class="spec-label">Requerida</span>
+                <span class="spec-value humidity-value">{{ ave.humedad }} %</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Actual</span>
+                <span class="spec-value humidity-value">55 % <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i></span>
+              </div>
+            </div>
+            
+            <div class="spec-card">
+              <h3><i class="fas fa-calendar-alt"></i> Incubación</h3>
+              <div class="spec-item">
+                <span class="spec-label">Días requeridos</span>
+                <span class="spec-value days-value">{{ ave.dias_incubacion }} días</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Días transcurridos</span>
+                <span class="spec-value days-value">
+                  {{ dias_transcurridos }} días 
+                  {% if finalizado %}
+                    <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                  {% else %}
+                    <i class="fas fa-clock" style="color: var(--secondary-color);"></i>
+                  {% endif %}
+                </span>
+              </div>          
             </div>
           </div>
-          
-          <div class="spec-card">
-            <h3><i class="fas fa-calendar-alt"></i> Incubación</h3>
-            <div class="spec-item">
-              <span class="spec-label">Días requeridos</span>
-              <span class="spec-value days-value">{{ ave.dias_incubacion }} días</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Días transcurridos</span>
-              <span class="spec-value days-value">
-                {{ dias_transcurridos }} días 
-                {% if finalizado %}
-                  <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
-                {% else %}
-                  <i class="fas fa-clock" style="color: var(--secondary-color);"></i>
-                {% endif %}
-              </span>
-            </div>          
-          </div>
-        </div>
+        {% else %}
+          <p style="color: var(--warning-color); font-weight: 600; font-size: 1.1rem; margin-top: 20px;">
+            Tipo de ave: Desconocido - Por favor asigna un tipo de ave para ver las especificaciones
+          </p>
+        {% endif %}
       {% else %}
         <p style="color: var(--warning-color); font-weight: 600; font-size: 1.1rem; margin-top: 20px;">
           Inicia un ciclo primero para ver las especificaciones del huevo.
         </p>
       {% endif %}
     </div>
-    
-    </div>
   </div>
+
   <div id="modalAve" class="modal">
     <div class="modal-content">
       <span class="close" onclick="cerrarModal()">&times;</span>
@@ -175,10 +154,12 @@
           <option value="{{ ave._id }}">{{ ave.nombre }}</option>
         {% endfor %}
       </select>
-      <button class="btn btn-primary" style="margin-top: 15px;" onclick="seleccionarAve()">Confirmar</button>
+      <button class="btn btn-primary" style="margin-top: 15px;" onclick="confirmarSeleccionAve()">Confirmar</button>
     </div>
   </div>
-  <div id="incubadora" data-id="{{ incubadora._id }}" style="display:none;"></div>
+
+  <div id="incubadora" data-codigo="{{ incubadora.codigo }}" style="display:none;"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
   <script src="{{ url_for('static', filename='js/incubadora_detalle.js') }}"></script>
 </body>

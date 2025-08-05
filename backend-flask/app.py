@@ -13,6 +13,10 @@ import io
 from PIL import Image
 import pillow_heif
 import json 
+from flask import make_response
+from flask import send_file
+import pandas as pd
+from io import BytesIO
 
 load_dotenv()
 
@@ -34,6 +38,8 @@ MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
 db = client.incubadorasDB
 
+db.incubadoras.create_index("codigo", unique=True)
+
 usuarios_col = db.usuarios
 incubadoras_col = db.incubadoras
 aves_col = db.aves
@@ -47,30 +53,30 @@ def recibir_datos():
         data = request.json
         temperatura = data.get("temperatura")
         humedad = data.get("humedad")
-        incubadora_id = data.get("incubadora_id")  # Ahora usando incubadora_id
+        codigo_incubadora = data.get("codigo_incubadora")  # Cambiado a código
 
         # Validación de datos
-        if None in (temperatura, humedad, incubadora_id):
+        if None in (temperatura, humedad, codigo_incubadora):
             return jsonify({
                 "error": "Datos incompletos",
-                "detalle": "Se requieren temperatura, humedad e incubadora_id"
+                "detalle": "Se requieren temperatura, humedad y código de incubadora"
             }), 400
 
-        # Validar que incubadora_id sea un ObjectId válido
-        try:
-            object_id = ObjectId(incubadora_id)
-        except:
+        # Buscar incubadora por código
+        incubadora = incubadoras_col.find_one({"codigo": codigo_incubadora})
+        if not incubadora:
             return jsonify({
-                "error": "ID de incubadora inválido",
-                "detalle": "El ID debe ser un ObjectId válido de 24 caracteres hexadecimales"
-            }), 400
+                "error": "Incubadora no encontrada",
+                "detalle": f"No existe incubadora con código {codigo_incubadora}"
+            }), 404
 
-        # Crear registro
+        # Crear registro usando el ObjectId interno pero referencia por código
         registro = {
             "fecha": datetime.now(),
             "temperatura": float(temperatura),
             "humedad": float(humedad),
-            "incubadora_id": object_id  # Guardado como ObjectId
+            "incubadora_id": incubadora["_id"],  # Referencia interna
+            "codigo_incubadora": codigo_incubadora  # Para fácil consulta
         }
 
         # Insertar en MongoDB
@@ -85,37 +91,25 @@ def recibir_datos():
             "error": "Error de formato",
             "detalle": str(e)
         }), 400
-    except PyMongoError as e:
-        return jsonify({
-            "error": "Error de base de datos",
-            "detalle": str(e)
-        }), 500
     except Exception as e:
         return jsonify({
             "error": "Error interno",
             "detalle": str(e)
         }), 500
 
-@app.route('/api/control', methods=['POST'])  # Cambiamos a POST
+@app.route('/api/control', methods=['POST'])
 def api_control():
     try:
         data = request.json
-        incubadora_id = data.get("incubadora_id")
+        codigo_incubadora = data.get("codigo_incubadora")  # Cambiado a código
         
-        # Debug: Imprime el ID para verificar
-        print(f"Buscando incubadora con ID: {incubadora_id}")
+        if not codigo_incubadora:
+            return jsonify({"error": "Código de incubadora requerido"}), 400
         
-        # Verifica si el ID es válido
-        if not incubadora_id or not ObjectId.is_valid(incubadora_id):
-            return jsonify({"error": "ID de incubadora inválido o faltante"}), 400
-        
-        incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+        incubadora = incubadoras_col.find_one({"codigo": codigo_incubadora})
         
         if not incubadora:
             return jsonify({"error": "Incubadora no encontrada"}), 404
-        
-        # Debug: Imprime los datos de la incubadora
-        print(f"Datos de la incubadora: {incubadora}")
         
         response_data = {
             "activa": incubadora.get("activa", False),
@@ -125,9 +119,6 @@ def api_control():
         
         return jsonify(response_data), 200
         
-    except PyMongoError as e:
-        print(f"Error de MongoDB: {str(e)}")
-        return jsonify({"error": "Error de base de datos"}), 500
     except Exception as e:
         print(f"Error inesperado: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
@@ -178,12 +169,12 @@ def api_list_incubadoras(user_id):
     for doc in incubadoras_col.find({"usuario_id": ObjectId(user_id)}):
         ave = aves_col.find_one({"_id": doc.get("ave_id")})
         incubadoras.append({
-            "id": str(doc["_id"]),
-            "codigo": doc["codigo"],
+            "codigo": doc["codigo"],  # Ahora código es el identificador principal
             "nombre": doc["nombre"],
             "ubicacion": doc["ubicacion"],
             "activa": doc.get("activa", True),
-            "tipo_ave": ave["nombre"] if ave else "Desconocido"
+            "tipo_ave": ave["nombre"] if ave else "Desconocido",
+            "object_id": str(doc["_id"])  # Opcional: mantener referencia
         })
     return jsonify(incubadoras)
 
@@ -206,10 +197,10 @@ def api_add_incubadora():
         "codigo": codigo,
         "nombre": data.get("nombre", ""),
         "ubicacion": data.get("ubicacion", ""),
-        "activa": False,  # Por defecto inactiva hasta que se asigne un ave
+        "activa": False,
         "inicio_activacion": None,
         "usuario_id": ObjectId(user_id),
-        "ave_id": None  # Ya no es obligatorio al crear
+        "ave_id": None
     })
 
     # Marcar código como usado
@@ -228,12 +219,12 @@ def home():
     for doc in incubadoras_col.find({"usuario_id": user_id}):
         ave = aves_col.find_one({"_id": doc.get("ave_id")})
         incubadoras.append({
-            "id": str(doc["_id"]),
-            "codigo": doc["codigo"],
+            "codigo": doc["codigo"],  # Usar código como identificador
             "nombre": doc["nombre"],
             "ubicacion": doc["ubicacion"],
             "activa": doc.get("activa", True),
-            "tipo_ave": ave["nombre"] if ave else "Desconocido"
+            "tipo_ave": ave["nombre"] if ave else "Desconocido",
+            "object_id": str(doc["_id"])  # Mantener para compatibilidad
         })
     aves = list(aves_col.find())
     return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"), aves=aves)
@@ -399,14 +390,11 @@ def incubadoras():
         data = request.form
         codigo = data.get("codigo")
 
-        # Validar que codigo no esté vacío
         if not codigo:
-            # Guardamos incubadoras para mostrar la página con error
             user_id = ObjectId(session["user_id"])
             incubadoras = []
             for doc in incubadoras_col.find({"usuario_id": user_id}):
                 incubadoras.append({
-                    "id": str(doc["_id"]),
                     "codigo": doc["codigo"],
                     "nombre": doc["nombre"],
                     "ubicacion": doc["ubicacion"],
@@ -414,14 +402,12 @@ def incubadoras():
                 })
             return render_template("incubadoras.html", error="Código es requerido", incubadoras=incubadoras, nombre=session.get("user_name"))
 
-        # Validar código
         codigo_valido = codigos_col.find_one({"codigo": codigo, "usado": False})
         if not codigo_valido:
             user_id = ObjectId(session["user_id"])
             incubadoras = []
             for doc in incubadoras_col.find({"usuario_id": user_id}):
                 incubadoras.append({
-                    "id": str(doc["_id"]),
                     "codigo": doc["codigo"],
                     "nombre": doc["nombre"],
                     "ubicacion": doc["ubicacion"],
@@ -429,7 +415,6 @@ def incubadoras():
                 })
             return render_template("incubadoras.html", error="Código inválido o ya usado", incubadoras=incubadoras, nombre=session.get("user_name"))
 
-        # Insertar incubadora SIN ave_id
         incubadoras_col.insert_one({
             "codigo": codigo,
             "nombre": data["nombre"],
@@ -440,8 +425,6 @@ def incubadoras():
         })
 
         codigos_col.update_one({"_id": codigo_valido["_id"]}, {"$set": {"usado": True}})
-
-        # Redireccionar a GET para evitar reenvío del formulario
         return redirect(url_for('incubadoras'))
     
     # GET
@@ -449,7 +432,6 @@ def incubadoras():
     incubadoras = []
     for doc in incubadoras_col.find({"usuario_id": user_id}):
         incubadoras.append({
-            "id": str(doc["_id"]),
             "codigo": doc["codigo"],
             "nombre": doc["nombre"],
             "ubicacion": doc["ubicacion"],
@@ -457,10 +439,10 @@ def incubadoras():
         })
     return render_template('incubadoras.html', incubadoras=incubadoras, nombre=session.get("user_name"))
 
-@app.route('/api/incubadora-detalle/<incubadora_id>', methods=['GET'])
-def get_incubadora_detalle(incubadora_id):
+@app.route('/api/incubadora-detalle/<codigo>', methods=['GET'])
+def get_incubadora_detalle(codigo):
     try:
-        incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
         if not incubadora:
             return jsonify({"error": "Incubadora no encontrada"}), 404
         
@@ -474,19 +456,12 @@ def get_incubadora_detalle(incubadora_id):
             if incubadora.get("activa") and incubadora.get("inicio_activacion"):
                 ahora_utc = datetime.now(timezone.utc)
                 inicio_utc = incubadora["inicio_activacion"].astimezone(timezone.utc)
-                
-                # Cálculo CORRECTO de días transcurridos
-                diferencia =  inicio_utc - ahora_utc
-                dias_transcurridos = diferencia.days
-                
-                # Asegurarnos que no sea negativo (por si hay problemas de zona horaria)
-                dias_transcurridos = max(0, dias_transcurridos)
+                dias_transcurridos = (ahora_utc - inicio_utc).days
                 
                 if ave and dias_transcurridos >= ave.get("dias_incubacion", 0):
                     finalizado = True
-                    # Actualizar estado si finalizó
                     incubadoras_col.update_one(
-                        {"_id": ObjectId(incubadora_id)},
+                        {"codigo": codigo},
                         {"$set": {"activa": False}}
                     )
                     incubadora["activa"] = False
@@ -494,7 +469,6 @@ def get_incubadora_detalle(incubadora_id):
         return jsonify({
             "success": True,
             "incubadora": {
-                "_id": str(incubadora["_id"]),
                 "codigo": incubadora["codigo"],
                 "nombre": incubadora["nombre"],
                 "ubicacion": incubadora["ubicacion"],
@@ -516,17 +490,17 @@ def get_incubadora_detalle(incubadora_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/incubadora/<id>')
-def ver_incubadora(id):
+@app.route('/incubadora/<codigo>')
+def ver_incubadora(codigo):
     if "user_id" not in session:
         return redirect(url_for('login_form'))
 
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
+    incubadora = incubadoras_col.find_one({"codigo": codigo})
     if not incubadora:
         return "Incubadora no encontrada", 404
 
     ave = aves_col.find_one({"_id": incubadora.get("ave_id")})
-    aves = list(aves_col.find())  # <--- AGREGADO
+    aves = list(aves_col.find())
 
     dias_transcurridos = 0
     finalizado = False
@@ -535,12 +509,12 @@ def ver_incubadora(id):
     if incubadora.get("activa") and inicio:
         ahora_utc = datetime.now(timezone.utc).date()
         inicio_utc = inicio.astimezone(timezone.utc).date()
-        dias_transcurridos = (inicio_utc - ahora_utc).days
+        dias_transcurridos = (ahora_utc - inicio_utc).days
         finalizado = dias_transcurridos >= ave["dias_incubacion"] if ave else False
 
         if finalizado:
             incubadoras_col.update_one(
-                {"_id": ObjectId(id)},
+                {"codigo": codigo},
                 {"$set": {"activa": False}}
             )
             incubadora["activa"] = False
@@ -549,25 +523,23 @@ def ver_incubadora(id):
         "incubadora_detalle.html",
         incubadora=incubadora,
         ave=ave,
-        aves=aves,  # <--- AGREGADO
+        aves=aves,
         dias_transcurridos=dias_transcurridos,
         finalizado=finalizado
     )
 
 
-@app.route('/incubadora/<id>/registros')
-def registros_incubadora(id):
+@app.route('/incubadora/<codigo>/registros')
+def registros_incubadora(codigo):
     if "user_id" not in session:
         return redirect(url_for('login_form'))
 
     try:
-        # Verificar que la incubadora existe y pertenece al usuario
-        incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
         if not incubadora:
             return jsonify({"error": "Incubadora no encontrada"}), 404
 
-        # Obtener registros (usando "fecha" en lugar de "fechaHora")
-        registros_cursor = registros_col.find({"incubadora_id": ObjectId(id)}).sort("fecha", 1)
+        registros_cursor = registros_col.find({"codigo_incubadora": codigo}).sort("fecha", 1)
 
         registros = []
         for r in registros_cursor:
@@ -578,10 +550,8 @@ def registros_incubadora(id):
             })
 
         return jsonify(registros)
-
     except Exception as e:
-        print(f"Error al obtener registros: {str(e)}")
-        return jsonify({"error": "Error al obtener registros"}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/aves', methods=['GET'])
 def api_get_aves():
@@ -597,35 +567,94 @@ def api_get_aves():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/incubadora/<incubadora_id>', methods=['GET'])
-def api_get_incubadora(incubadora_id):
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
-    if not incubadora:
-        return jsonify({"error": "Incubadora no encontrada"}), 404
-    
-    ave = aves_col.find_one({"_id": incubadora.get("ave_id")})
-    return jsonify({
-        "_id": str(incubadora["_id"]),
-        "codigo": incubadora["codigo"],
-        "nombre": incubadora["nombre"],
-        "ubicacion": incubadora["ubicacion"],
-        "activa": incubadora.get("activa", True),
-        "tipo_ave": ave["nombre"] if ave else "Desconocido"
-    })
-
-@app.route('/api/incubadora/<incubadora_id>/registros', methods=['GET'])
-def api_get_registros(incubadora_id):
-    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fecha", 1)
-    
-    registros = []
-    for r in registros_cursor:
-        registros.append({
-            "fecha": r["fecha"].isoformat(),
-            "temperatura": r["temperatura"],
-            "humedad": r["humedad"]
+@app.route('/api/incubadora/<codigo>', methods=['GET'])
+def api_get_incubadora(codigo):
+    try:
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+        
+        # Convertir ObjectId a string para serialización JSON
+        ave_id = str(incubadora["ave_id"]) if "ave_id" in incubadora else None
+        
+        return jsonify({
+            "codigo": incubadora["codigo"],
+            "nombre": incubadora.get("nombre", ""),
+            "ubicacion": incubadora.get("ubicacion", ""),
+            "activa": incubadora.get("activa", False),
+            "ave_id": ave_id,
+            "inicio_activacion": incubadora.get("inicio_activacion", ""),
+            # Agrega otros campos necesarios
         })
-    
-    return jsonify(registros)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 
+
+@app.route('/api/incubadora/<codigo>/iniciar-ciclo', methods=['POST'])
+def iniciar_ciclo_incubadora(codigo):
+    try:
+        data = request.get_json()
+        ave_id = data.get('ave_id')
+        
+        if not ave_id:
+            return jsonify({"error": "Se requiere el ID del ave"}), 400
+        
+        # Verificar que el ave existe
+        ave = aves_col.find_one({"_id": ObjectId(ave_id)})
+        if not ave:
+            return jsonify({"error": "Ave no encontrada"}), 404
+        
+        # Actualizar la incubadora
+        result = incubadoras_col.update_one(
+            {"codigo": codigo},
+            {"$set": {
+                "activa": True,
+                "ave_id": ObjectId(ave_id),
+                "inicio_activacion": datetime.now(),
+                "ultima_actualizacion": datetime.now()
+            }}
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({
+                "success": True,
+                "message": "Ciclo iniciado correctamente"
+            })
+        else:
+            return jsonify({"error": "No se pudo iniciar el ciclo"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/incubadora/<codigo>/registros', methods=['GET'])
+def api_get_registros(codigo):
+    try:
+        # Primero encontrar la incubadora por su código para obtener su ObjectId
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+
+        # Obtener registros usando el ObjectId de la incubadora
+        registros_cursor = registros_col.find({"incubadora_id": incubadora["_id"]}).sort("fecha", 1)
+        
+        registros = []
+        for r in registros_cursor:
+            # Manejar casos donde el campo fecha podría no existir o tener diferente nombre
+            fecha = r.get("fecha") or r.get("fechaHora") or datetime.now()
+            
+            registro = {
+                "fecha": fecha.isoformat() if hasattr(fecha, 'isoformat') else fecha,
+                "temperatura": r.get("temperatura", 0),
+                "humedad": r.get("humedad", 0)
+            }
+            registros.append(registro)
+        
+        return jsonify(registros)
+
+    except Exception as e:
+        print(f"Error al obtener registros: {str(e)}")
+        return jsonify({
+            "error": "Error al obtener registros",
+            "detalle": str(e)
+        }), 500
 
 @app.route('/perfil/registros')
 def perfil_registros():
@@ -647,30 +676,30 @@ def perfil_registros():
     registros.sort(key=lambda r: r["fecha"])
     return jsonify(registros)
 
-@app.route('/api/incubadora/<id>/toggle', methods=['POST'])
-def toggle_incubadora(id):
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
-    if not incubadora:
-        return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
+# @app.route('/api/incubadora/<codigo>/toggle', methods=['POST'])
+# def toggle_incubadora(codigo):
+#     incubadora = incubadoras_col.find_one({"codigo": codigo})
+#     if not incubadora:
+#         return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
 
-    nueva_activa = not incubadora.get("activa", False)
+#     nueva_activa = not incubadora.get("activa", False)
 
-    actualizacion = {"activa": nueva_activa}
-    if nueva_activa:
-        actualizacion["inicio_activacion"] = datetime.now()
-    else:
-        actualizacion["inicio_activacion"] = None
+#     actualizacion = {"activa": nueva_activa}
+#     if nueva_activa:
+#         actualizacion["inicio_activacion"] = datetime.now()
+#     else:
+#         actualizacion["inicio_activacion"] = None
 
-    incubadoras_col.update_one({"_id": ObjectId(id)}, {"$set": actualizacion})
+#     incubadoras_col.update_one({"codigo": codigo}, {"$set": actualizacion})
     
-    return jsonify({"success": True, "activa": nueva_activa})
+#     return jsonify({"success": True, "activa": nueva_activa})
 
-@app.route('/api/incubadora/<id>/asignar-ave', methods=['POST'])
-def asignar_ave(id):
+@app.route('/api/incubadora/<codigo>/asignar-ave', methods=['POST'])
+def asignar_ave(codigo):
     data = request.get_json()
     ave_id = data.get('ave_id')
 
-    incubadora = incubadoras_col.find_one({'_id': ObjectId(id)})
+    incubadora = incubadoras_col.find_one({'codigo': codigo})
     if not incubadora:
         return jsonify({'success': False, 'message': 'Incubadora no encontrada'}), 404
 
@@ -678,9 +707,8 @@ def asignar_ave(id):
     if not ave:
         return jsonify({'success': False, 'message': 'Ave no encontrada'}), 404
 
-    # Actualizar incubadora con el ave seleccionada y activar
     incubadoras_col.update_one(
-        {'_id': ObjectId(id)},
+        {'codigo': codigo},
         {
             '$set': {
                 'ave_id': ave['_id'],
@@ -699,39 +727,58 @@ def asignar_ave(id):
         'inicio_activacion': datetime.now().isoformat()
     })
 
-@app.route("/api/incubadora/<id>/apagar", methods=["POST"])
-def off_incubadora(id):
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(id)})
-    if not incubadora:
-        return jsonify({"success": False, "message": "Incubadora no encontrada"}), 404
+@app.route('/api/incubadora/<codigo>/apagar', methods=['POST'])
+def offIncubadora(codigo):
+    try:
+        # Verificar que la incubadora existe
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+            
+        if not incubadora.get("activa", False):
+            return jsonify({"error": "La incubadora ya está apagada"}), 400
+        
+        # Actualizar la incubadora (apagar y resetear ave_id)
+        result = incubadoras_col.update_one(
+            {"codigo": codigo},
+            {"$set": {
+                "activa": False,
+                "ave_id": None,  # Esto asegura que el tipo de ave se resetee
+                "inicio_activacion": None,
+                "ultima_actualizacion": datetime.now()
+            }}
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({
+                "success": True,
+                "message": "Incubadora apagada correctamente"
+            })
+        else:
+            return jsonify({"error": "No se pudo apagar la incubadora"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    # Reiniciar todos los valores
-    incubadoras_col.update_one({"_id": ObjectId(id)}, {
-        "$set": {
-            "activa": False,
-            "inicio_activacion": None,
-            "ave_id": None
-        }
-    })
-    
-    return jsonify({"success": True, "message": "Incubadora apagada correctamente"})
-
-@app.route("/apagar-incubadora/<id>", methods=["POST"])
-def apagar_incubadora(id):
+@app.route("/apagar-incubadora/<codigo>", methods=["POST"])
+def apagar_incubadora(codigo):
     # Verificar si el usuario está autenticado
     if "user_id" not in session:
         return jsonify({"error": "No autorizado: usuario no autenticado"}), 401
     
     try:
         user_id = ObjectId(session["user_id"])
-        incubadora = incubadoras_col.find_one({"_id": ObjectId(id), "usuario_id": user_id})
+        # Buscar incubadora por código y que pertenezca al usuario
+        incubadora = incubadoras_col.find_one({
+            "codigo": codigo,
+            "usuario_id": user_id
+        })
         
         if not incubadora:
             return jsonify({"error": "Incubadora no encontrada o no pertenece al usuario"}), 404
 
-        # Actualizar estado
+        # Actualizar estado usando el código
         result = incubadoras_col.update_one(
-            {"_id": ObjectId(id)},
+            {"codigo": codigo},
             {"$set": {
                 "activa": False,
                 "inicio_activacion": None,
@@ -748,14 +795,13 @@ def apagar_incubadora(id):
         print(f"Error al apagar incubadora: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
-@app.route('/exportar-registros/<incubadora_id>')
-def exportar_registros(incubadora_id):
-    # Verifica que la incubadora existe
-    incubadora = incubadoras_col.find_one({"_id": ObjectId(incubadora_id)})
+@app.route('/exportar-registros/<codigo>')
+def exportar_registros(codigo):
+    incubadora = incubadoras_col.find_one({"codigo": codigo})
     if not incubadora:
         return "Incubadora no encontrada", 404
 
-    registros_cursor = registros_col.find({"incubadora_id": ObjectId(incubadora_id)}).sort("fecha", 1)
+    registros_cursor = registros_col.find({"codigo_incubadora": codigo}).sort("fecha", 1)
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -862,6 +908,68 @@ def api_cambiar_imagen_perfil(user_id):
     )
 
     return jsonify({"success": True, "imagen_perfil": ruta_relativa})
+
+@app.route('/api/incubadora/<codigo>/limpiar-registros', methods=['POST'])
+def limpiar_registros_incubadora(codigo):
+    try:
+        # Verificar que la incubadora existe
+        incubadora = incubadoras_col.find_one({"codigo": codigo})
+        if not incubadora:
+            return jsonify({"error": "Incubadora no encontrada"}), 404
+
+        # Eliminar todos los registros de esta incubadora
+        registros_col.delete_many({"codigo_incubadora": codigo})
+
+        # Resetear el tipo de ave
+        incubadoras_col.update_one(
+            {"codigo": codigo},
+            {"$set": {
+                "ave_id": None,
+                "inicio_activacion": None,
+                "ultima_actualizacion": datetime.now()
+            }}
+        )
+
+        return jsonify({"success": True, "message": "Registros eliminados y ave resetada"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/incubadora/<codigo>/exportar-registros', methods=['GET'])
+def exportRegistros(codigo):
+    try:
+        # Obtener todos los registros de la incubadora
+        registros = list(registros_col.find({"codigo_incubadora": codigo}).sort("fecha", 1))
+
+        if not registros:
+            return jsonify({"error": "No hay registros para exportar"}), 404
+
+        # Crear contenido CSV
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Escribir encabezados
+        writer.writerow(["Fecha", "Hora", "Temperatura (°C)", "Humedad (%)"])
+        
+        # Escribir datos
+        for registro in registros:
+            fecha = registro["fecha"].strftime("%Y-%m-%d")
+            hora = registro["fecha"].strftime("%H:%M:%S")
+            writer.writerow([
+                fecha,
+                hora,
+                registro["temperatura"],
+                registro["humedad"]
+            ])
+        
+        # Preparar respuesta
+        output.seek(0)
+        response = make_response(output.getvalue())
+        response.headers["Content-Disposition"] = f"attachment; filename=registros_{codigo}.csv"
+        response.headers["Content-type"] = "text/csv"
+        
+        return response
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

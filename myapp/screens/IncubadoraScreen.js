@@ -71,7 +71,7 @@ export default function IncubadorasScreen({ route, navigation }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('DetalleIncubadora', {
-        incubadoraId: item.id,
+        codigoIncubadora: item.codigo,  // Cambiado a codigoIncubadora
         userId: userId
       })}
       activeOpacity={0.9}
@@ -234,7 +234,7 @@ export default function IncubadorasScreen({ route, navigation }) {
           <>
             <FlatList
               data={paginatedIncubadoras}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.codigo}  // Cambiado a usar codigo como key
               renderItem={renderItem}
               numColumns={2}
               columnWrapperStyle={styles.columnWrapper}
@@ -483,5 +483,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-
 });

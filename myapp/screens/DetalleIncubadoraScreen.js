@@ -8,18 +8,18 @@ import {
   TouchableOpacity, 
   Modal, 
   Alert,
-  Dimensions
+  Dimensions,
+  Image,
+  Linking
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
-import { Picker } from '@react-native-picker/picker';
 import API_BASE_URL from '../config';
-import { Image } from 'react-native';
 import { obtenerIconoAve } from '../avesConfig';
 
 export default function DetalleIncubadora({ route, navigation }) {
-  const { incubadoraId, userId } = route.params;
+  const { codigoIncubadora, userId } = route.params; // Cambiado a codigoIncubadora
   const [incubadora, setIncubadora] = useState(null);
   const [ave, setAve] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,60 +31,50 @@ export default function DetalleIncubadora({ route, navigation }) {
   const [diasTranscurridos, setDiasTranscurridos] = useState(0);
   const [finalizado, setFinalizado] = useState(false);
 
-  // Cargar datos completos de la incubadora
-// En la función cargarDatosIncubadora
-const cargarDatosIncubadora = async () => {
-  try {
-    setLoading(true);
-    const res = await axios.get(`${API_BASE_URL}/api/incubadora-detalle/${incubadoraId}`);
-    
-    if (res.data.success) {
-      setIncubadora(res.data.incubadora);
-      setAve(res.data.ave || null);
-      // Usamos directamente los días calculados en el backend
-      setDiasTranscurridos(res.data.dias_transcurridos || 0);
-      setFinalizado(res.data.finalizado || false);
-      
-      // Si está activa pero no finalizada, iniciamos temporizador
-      if (res.data.incubadora.activa && !res.data.finalizado) {
-        iniciarTemporizador(res.data.dias_transcurridos);
+  const cargarDatosIncubadora = async () => {
+    try {
+      setLoading(true);
+      const [incubadoraRes, registrosRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/incubadora-detalle/${codigoIncubadora}`),
+        axios.get(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/registros`)
+      ]);
+
+      if (incubadoraRes.data.success) {
+        setIncubadora(incubadoraRes.data.incubadora);
+        setAve(incubadoraRes.data.ave || null);
+        setDiasTranscurridos(incubadoraRes.data.dias_transcurridos || 0);
+        setFinalizado(incubadoraRes.data.finalizado || false);
+        setRegistros(registrosRes.data);
       }
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error cargando datos:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-// Temporizador optimizado
-const iniciarTemporizador = (diasIniciales) => {
-  setDiasTranscurridos(diasIniciales);
-  
-  const intervalo = setInterval(() => {
-    setDiasTranscurridos(prev => {
-      const nuevosDias = prev + 1;
-      
-      // Verificar si ha finalizado el ciclo
-      if (ave && nuevosDias >= ave.dias_incubacion) {
-        setFinalizado(true);
-        clearInterval(intervalo);
-        return ave.dias_incubacion; // No pasar del máximo
-      }
-      
-      return nuevosDias;
-    });
-  }, 86400000); // Actualizar cada 24 horas
+  const iniciarTemporizador = (diasIniciales) => {
+    setDiasTranscurridos(diasIniciales);
+    
+    const intervalo = setInterval(() => {
+      setDiasTranscurridos(prev => {
+        const nuevosDias = prev + 1;
+        if (ave && nuevosDias >= ave.dias_incubacion) {
+          setFinalizado(true);
+          clearInterval(intervalo);
+          return ave.dias_incubacion;
+        }
+        return nuevosDias;
+      });
+    }, 86400000); // Actualizar cada 24 horas
 
-  return () => clearInterval(intervalo);
-};
+    return () => clearInterval(intervalo);
+  };
 
-  // Cargar datos al montar y al regresar a la vista
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', cargarDatosIncubadora);
     cargarDatosIncubadora();
     
-    // Cargar lista de aves
     const cargarAves = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/api/aves`);
@@ -96,78 +86,81 @@ const iniciarTemporizador = (diasIniciales) => {
     cargarAves();
 
     return unsubscribe;
-  }, [navigation, incubadoraId]);
-
-  // Temporizador para actualizar días transcurridos
-  useEffect(() => {
-    let intervalo;
-    if (incubadora?.activa && incubadora?.inicio_activacion && !finalizado) {
-      intervalo = setInterval(() => {
-        const ahora = new Date();
-        const inicio = new Date(incubadora.inicio_activacion);
-        const diffTiempo = ahora - inicio;
-        const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
-        setDiasTranscurridos(diffDias);
-        
-        // Verificar si finalizó
-        if (ave && diffDias >= ave.dias_incubacion) {
-          setFinalizado(true);
-          clearInterval(intervalo);
-        }
-      }, 3600000); // Actualizar cada hora
-    }
-    return () => clearInterval(intervalo);
-  }, [incubadora, ave, finalizado]);
+  }, [navigation, codigoIncubadora]);
 
   const iniciarCiclo = async () => {
     if (!aveSeleccionada) {
-      Alert.alert('Error', 'Por favor selecciona un tipo de ave');
+      Alert.alert('Error', 'Selecciona un tipo de ave');
       return;
     }
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/incubadora/${incubadoraId}/asignar-ave`, {
+      const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/asignar-ave`, {
         ave_id: aveSeleccionada
       });
 
       if (res.data.success) {
-        // Recargar todos los datos después de iniciar
         await cargarDatosIncubadora();
         setShowModalAve(false);
         setAveSeleccionada(null);
       }
     } catch (error) {
-      console.error('Error al iniciar ciclo:', error);
-      Alert.alert('Error', 'No se pudo iniciar el ciclo');
+      Alert.alert('Error', error.response?.data?.message || 'Error al iniciar ciclo');
     }
   };
 
-  const apagarIncubadora = () => {
+  const apagarIncubadora = async () => {
     Alert.alert(
-      'Confirmar',
-      '¿Estás seguro que deseas apagar la incubadora? Esto reiniciará todo el ciclo.',
+      'Apagar incubadora',
+      '¿Deseas descargar un archivo con los registros antes de apagar?',
       [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Apagar', 
-          onPress: confirmarApagar,
+        {
+          text: 'No',
+          onPress: async () => {
+            try {
+              const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
+              if (res.data.success) {
+                Alert.alert('Éxito', 'Incubadora apagada');
+                await cargarDatosIncubadora();
+              }
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo apagar la incubadora');
+            }
+          },
           style: 'destructive'
+        },
+        {
+          text: 'Sí',
+          onPress: async () => {
+            try {
+              const url = `${API_BASE_URL}/api/incubadora/${codigoIncubadora}/exportar-registros`;
+              const supported = await Linking.canOpenURL(url);
+              
+              if (supported) {
+                await Linking.openURL(url);
+                
+                // Esperar un momento y luego apagar
+                setTimeout(async () => {
+                  const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
+                  if (res.data.success) {
+                    Alert.alert('Éxito', 'Archivo descargado e incubadora apagada');
+                    await cargarDatosIncubadora();
+                  }
+                }, 2000);
+              } else {
+                Alert.alert('Error', 'No se pudo abrir el enlace de descarga');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo completar la operación');
+            }
+          }
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel'
         }
       ]
     );
-  };
-
-  const confirmarApagar = async () => {
-    try {
-      const res = await axios.post(`${API_BASE_URL}/api/incubadora/${incubadoraId}/apagar`);
-      if (res.data.success) {
-        // Recargar todos los datos después de apagar
-        await cargarDatosIncubadora();
-      }
-    } catch (error) {
-      console.error('Error al apagar incubadora:', error);
-      Alert.alert('Error', 'No se pudo apagar la incubadora');
-    }
   };
 
   if (loading) {
@@ -188,7 +181,6 @@ const iniciarTemporizador = (diasIniciales) => {
         <TouchableOpacity 
           style={styles.primaryButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
         >
           <Ionicons name="arrow-back" size={20} color="#FFF" style={styles.buttonIcon} />
           <Text style={styles.primaryButtonText}>Volver atrás</Text>
@@ -201,95 +193,91 @@ const iniciarTemporizador = (diasIniciales) => {
     <ScrollView 
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
     >
+      <Modal
+        visible={showModalAve}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowModalAve(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecciona el tipo de ave</Text>
+            
+            <ScrollView contentContainerStyle={styles.avesContainer}>
+              {aves.map(ave => (
+                <TouchableOpacity
+                  key={ave._id}
+                  style={[
+                    styles.aveOption,
+                    aveSeleccionada === ave._id && styles.aveOptionSelected
+                  ]}
+                  onPress={() => setAveSeleccionada(ave._id)}
+                >
+                  <View style={[
+                    styles.aveCircle,
+                    aveSeleccionada === ave._id && styles.aveCircleSelected
+                  ]}>
+                    <Image 
+                      source={obtenerIconoAve(ave.nombre)} 
+                      style={styles.aveIcon} 
+                    />
+                  </View>
+                  <View style={styles.aveInfo}>
+                    <Text style={[
+                      styles.aveName,
+                      aveSeleccionada === ave._id && styles.aveNameSelected
+                    ]}>
+                      {ave.nombre}
+                    </Text>
+                    <Text style={styles.aveDays}>{ave.dias_incubacion} días de incubación</Text>
+                    <Text style={styles.aveDetails}>
+                      Temp: {ave.temperatura_ideal}°C - Hum: {ave.humedad_ideal}%
+                    </Text>
+                  </View>
+                  {aveSeleccionada === ave._id && (
+                    <Ionicons 
+                      name="checkmark-circle" 
+                      size={24} 
+                      color="#6C63FF" 
+                      style={styles.aveCheckmark}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
 
-<Modal
-  visible={showModalAve}
-  animationType="slide"
-  transparent={true}
-  onRequestClose={() => setShowModalAve(false)}
->
-  <View style={styles.modalContainer}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Selecciona el tipo de ave</Text>
-      
-      <ScrollView contentContainerStyle={styles.avesContainer}>
-        {aves.map(ave => (
-          <TouchableOpacity
-            key={ave._id}
-            style={[
-              styles.aveOption,
-              aveSeleccionada === ave._id && styles.aveOptionSelected
-            ]}
-            onPress={() => setAveSeleccionada(ave._id)}
-          >
-            <View style={[
-              styles.aveCircle,
-              aveSeleccionada === ave._id && styles.aveCircleSelected
-            ]}>
-              <Image 
-              source={obtenerIconoAve(ave.nombre)} 
-              style={{ width: 40, height: 40, resizeMode: 'contain' }} 
-            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setAveSeleccionada(null);
+                  setShowModalAve(false);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[
+                  styles.modalButton, 
+                  styles.confirmButton,
+                  !aveSeleccionada && styles.disabledButton
+                ]}
+                onPress={iniciarCiclo}
+                disabled={!aveSeleccionada}
+              >
+                <Text style={styles.confirmButtonText}>Iniciar ciclo</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.aveInfo}>
-              <Text style={[
-                styles.aveName,
-                aveSeleccionada === ave._id && styles.aveNameSelected
-              ]}>
-                {ave.nombre}
-              </Text>
-              <Text style={styles.aveDays}>{ave.dias_incubacion} días de incubación</Text>
-              <Text style={styles.aveDetails}>
-                Temp: {ave.temperatura_ideal}°C - Hum: {ave.humedad_ideal}%
-              </Text>
-            </View>
-            {aveSeleccionada === ave._id && (
-              <Ionicons 
-                name="checkmark-circle" 
-                size={24} 
-                color="#6C63FF" 
-                style={styles.aveCheckmark}
-              />
-            )}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <View style={styles.modalButtons}>
-        <TouchableOpacity 
-          style={[styles.modalButton, styles.cancelButton]}
-          onPress={() => {
-            setAveSeleccionada(null);
-            setShowModalAve(false);
-          }}
-        >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.modalButton, 
-            styles.confirmButton,
-            !aveSeleccionada && styles.disabledButton
-          ]}
-          onPress={iniciarCiclo}
-          disabled={!aveSeleccionada}
-        >
-          <Text style={styles.confirmButtonText}>Iniciar ciclo</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => navigation.goBack()}
           style={styles.backButton}
-          activeOpacity={0.7}
         >
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
@@ -346,16 +334,23 @@ const iniciarTemporizador = (diasIniciales) => {
         {finalizado ? (
           <TouchableOpacity
             style={[styles.actionButton, styles.finishedButton]}
-            activeOpacity={0.8}
           >
             <Ionicons name="checkmark-done" size={20} color="#FFF" style={styles.buttonIcon} />
             <Text style={styles.actionButtonText}>Ciclo completado</Text>
           </TouchableOpacity>
         ) : incubadora.activa ? (
           <TouchableOpacity
-            onPress={apagarIncubadora}
+            onPress={() => {
+              Alert.alert(
+                'Confirmar',
+                '¿Estás seguro que deseas apagar la incubadora?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Apagar', onPress: apagarIncubadora, style: 'destructive' }
+                ]
+              );
+            }}
             style={[styles.actionButton, styles.deactivateButton]}
-            activeOpacity={0.8}
           >
             <Ionicons name="power" size={20} color="#FFF" style={styles.buttonIcon} />
             <Text style={styles.actionButtonText}>Apagar incubadora</Text>
@@ -364,7 +359,6 @@ const iniciarTemporizador = (diasIniciales) => {
           <TouchableOpacity
             onPress={() => setShowModalAve(true)}
             style={[styles.actionButton, styles.activateButton]}
-            activeOpacity={0.8}
           >
             <Ionicons name="play" size={20} color="#FFF" style={styles.buttonIcon} />
             <Text style={styles.actionButtonText}>Iniciar ciclo</Text>
@@ -375,7 +369,6 @@ const iniciarTemporizador = (diasIniciales) => {
       <TouchableOpacity 
         style={styles.toggleSection}
         onPress={() => setShowRegistros(!showRegistros)}
-        activeOpacity={0.7}
       >
         <Text style={styles.toggleSectionText}>
           {showRegistros ? 'Ocultar registros' : 'Mostrar registros'}
@@ -401,7 +394,7 @@ const iniciarTemporizador = (diasIniciales) => {
                   data={{
                     labels: registros.map((r, i) => 
                       i % Math.ceil(registros.length / 5) === 0 ? 
-                      new Date(r.fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
+                      new Date(r.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
                       ''
                     ),
                     datasets: [
@@ -753,39 +746,83 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '90%',
     maxWidth: 400,
+    maxHeight: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
     color: '#2D3748',
   },
-  pickerContainer: {
+  avesContainer: {
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+  },
+  aveOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 15,
+    backgroundColor: '#F8F9FA',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 10,
-    marginBottom: 20,
-    backgroundColor: '#F8F9FA',
-    overflow: 'hidden',
   },
-  picker: {
-    width: '100%',
+  aveOptionSelected: {
+    backgroundColor: '#EBF4FF',
+    borderColor: '#6C63FF',
+  },
+  aveCircle: {
+    width: 50,
     height: 50,
+    borderRadius: 25,
+    backgroundColor: '#EBF4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
   },
-  pickerItem: {
+  aveCircleSelected: {
+    backgroundColor: '#E0E7FF',
+  },
+  aveIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain'
+  },
+  aveInfo: {
+    flex: 1,
+  },
+  aveName: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#2D3748',
+  },
+  aveNameSelected: {
+    color: '#6C63FF',
+  },
+  aveDays: {
+    fontSize: 14,
+    color: '#718096',
+  },
+  aveDetails: {
+    fontSize: 12,
+    color: '#A0AEC0',
+  },
+  aveCheckmark: {
+    marginLeft: 10,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
   modalButton: {
-    padding: 12,
-    borderRadius: 10,
+    padding: 15,
+    borderRadius: 12,
     width: '48%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelButton: {
     backgroundColor: '#F8F9FA',
@@ -795,111 +832,15 @@ const styles = StyleSheet.create({
   confirmButton: {
     backgroundColor: '#6C63FF',
   },
-  modalButtonText: {
-    fontWeight: '600',
+  disabledButton: {
+    opacity: 0.6,
   },
   cancelButtonText: {
     color: '#6C63FF',
+    fontWeight: '600',
   },
   confirmButtonText: {
     color: '#FFF',
+    fontWeight: '600',
   },
-  // Agregar estos estilos al objeto StyleSheet
-modalContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  backgroundColor: 'rgba(0,0,0,0.5)',
-},
-modalContent: {
-  backgroundColor: '#FFF',
-  borderRadius: 20,
-  padding: 20,
-  width: '90%',
-  maxWidth: 400,
-  maxHeight: '80%',
-},
-modalTitle: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  marginBottom: 20,
-  textAlign: 'center',
-  color: '#2D3748',
-},
-avesContainer: {
-  paddingHorizontal: 10,
-  paddingBottom: 10,
-},
-aveOption: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 15,
-  marginBottom: 10,
-  borderRadius: 15,
-  backgroundColor: '#F8F9FA',
-  borderWidth: 1,
-  borderColor: '#E2E8F0',
-},
-aveOptionSelected: {
-  backgroundColor: '#EBF4FF',
-  borderColor: '#6C63FF',
-},
-aveCircle: {
-  width: 50,
-  height: 50,
-  borderRadius: 25,
-  backgroundColor: '#EBF4FF',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginRight: 15,
-},
-aveInfo: {
-  flex: 1,
-},
-aveName: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#2D3748',
-},
-aveNameSelected: {
-  color: '#6C63FF',
-},
-aveDays: {
-  fontSize: 14,
-  color: '#718096',
-},
-aveCheckmark: {
-  marginLeft: 10,
-},
-modalButtons: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginTop: 20,
-},
-modalButton: {
-  padding: 15,
-  borderRadius: 12,
-  width: '48%',
-  alignItems: 'center',
-  justifyContent: 'center',
-},
-cancelButton: {
-  backgroundColor: '#F8F9FA',
-  borderWidth: 1,
-  borderColor: '#6C63FF',
-},
-confirmButton: {
-  backgroundColor: '#6C63FF',
-},
-disabledButton: {
-  opacity: 0.6,
-},
-cancelButtonText: {
-  color: '#6C63FF',
-  fontWeight: '600',
-},
-confirmButtonText: {
-  color: '#FFF',
-  fontWeight: '600',
-},
 });

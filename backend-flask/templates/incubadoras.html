@@ -27,7 +27,6 @@
       </div>
     </div>
   </header>
-  
 
   <div class="container">
     <div class="card">
@@ -43,17 +42,16 @@
         {% for i in incubadoras %}
           <li class="incubadora-item">
             <div class="incubadora-info">
-              <a href="{{ url_for('ver_incubadora', id=i.id) }}" class="incubadora-name">
+              <a href="{{ url_for('ver_incubadora', codigo=i.codigo) }}" class="incubadora-name">
                 {{ i.nombre }} <i class="fas fa-chevron-right"></i>
               </a>              
               <div class="incubadora-details">
                 <span><i class="fas fa-map-marker-alt"></i> {{ i.ubicacion }}</span>
                 <span><i class="fas fa-barcode"></i> {{ i.codigo }}</span>
-                <span id="estado-{{ i.id }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" style="cursor: default;">
+                <span id="estado-{{ i.codigo }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" style="cursor: default;">
                   <i class="fas fa-{{ 'check-circle' if i.activa else 'times-circle' }}"></i> 
                   {{ "Activa" if i.activa else "Inactiva" }}
                 </span>                
-                
               </div>
             </div>
           </li>
@@ -73,11 +71,11 @@
       <div class="alert alert-danger">
         <i class="fas fa-exclamation-circle"></i> {{ error }}
       </div>
-    {% elif success %}
+      {% elif success %}
       <div class="alert alert-success">
         <i class="fas fa-check-circle"></i> {{ success }}
       </div>
-    {% endif %}
+      {% endif %}
 
       <form method="POST" action="/incubadoras#formulario">
         <div class="form-group">
@@ -93,17 +91,9 @@
         <div class="form-group">
           <label for="codigo"><i class="fas fa-barcode"></i> Código:</label>
           <input type="text" id="codigo" name="codigo" required placeholder="Ej: INC-001" />
+          <small class="form-text">Ingresa el código único proporcionado con tu incubadora</small>
         </div>
         
-        <!-- <div class="form-group">
-          <label for="ave_id"><i class="fas fa-dove"></i> Tipo de huevo:</label>
-          <select id="ave_id" name="ave_id" required>
-            {% for ave in aves %}
-              <option value="{{ ave._id }}">{{ ave.nombre }}</option>
-            {% endfor %}
-          </select>
-        </div> -->
-
         <button type="submit" class="btn btn-primary">
           <i class="fas fa-plus"></i> Agregar Incubadora
         </button>
