@@ -76,7 +76,7 @@ export default function LoginScreen({ navigation }) {
                 style={styles.inputIcon} 
               />
               <TextInput
-                placeholder="Correo electrónico"
+                placeholder="E-mail"
                 placeholderTextColor="#A0AEC0"
                 onChangeText={setEmail}
                 value={email}
@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }) {
               />
               <TextInput
                 ref={(input) => { this.passwordInput = input; }}
-                placeholder="Contraseña"
+                placeholder="Password"
                 placeholderTextColor="#A0AEC0"
                 onChangeText={setPassword}
                 value={password}
@@ -128,13 +128,13 @@ export default function LoginScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={styles.buttonText}>Iniciar sesión</Text>
+                <Text style={styles.buttonText}>Login</Text>
               )}
             </TouchableOpacity>
 
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>¿No tienes una cuenta?</Text>
+              <Text style={styles.footerText}>Don't have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
                 <Text style={styles.footerLink}>Regístrate</Text>
               </TouchableOpacity>
