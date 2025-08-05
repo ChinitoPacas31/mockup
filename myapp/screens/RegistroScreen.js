@@ -36,14 +36,14 @@ export default function RegistroScreen({ navigation }) {
       });
 
       if (res.data.success) {
-        setMensaje('Registro exitoso. Redirigiendo...');
+        setMensaje('Registration successful. Redirecting...');
         setTimeout(() => navigation.navigate('Login'), 2000);
       } else {
-        setMensaje(res.data.message || 'Error en el registro');
+        setMensaje(res.data.message || 'Registration error');
       }
     } catch (error) {
       console.error(error);
-      setMensaje('Error al conectar con el servidor');
+      setMensaje('Error connecting to the server');
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export default function RegistroScreen({ navigation }) {
               resizeMode="contain"
             />
             
-            <Text style={styles.subtitle}>Crear nueva cuenta</Text>
+            <Text style={styles.subtitle}>Create new account</Text>
 
             <View style={styles.inputContainer}>
               <Icon 
@@ -78,7 +78,7 @@ export default function RegistroScreen({ navigation }) {
                 style={styles.inputIcon} 
               />
               <TextInput
-                placeholder="Nombre completo"
+                placeholder="Full name"
                 placeholderTextColor="#A0AEC0"
                 onChangeText={setNombre}
                 value={nombre}
@@ -100,7 +100,7 @@ export default function RegistroScreen({ navigation }) {
               />
               <TextInput
                 ref={(input) => { this.emailInput = input; }}
-                placeholder="Correo electrónico"
+                placeholder="E-mail"
                 placeholderTextColor="#A0AEC0"
                 onChangeText={setEmail}
                 value={email}
@@ -123,7 +123,7 @@ export default function RegistroScreen({ navigation }) {
               />
               <TextInput
                 ref={(input) => { this.passwordInput = input; }}
-                placeholder="Contraseña"
+                placeholder="Password"
                 placeholderTextColor="#A0AEC0"
                 onChangeText={setPassword}
                 value={password}
@@ -152,14 +152,14 @@ export default function RegistroScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={styles.buttonText}>Registrarse</Text>
+                <Text style={styles.buttonText}>Sign up</Text>
               )}
             </TouchableOpacity>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>¿Ya tienes una cuenta?</Text>
+              <Text style={styles.footerText}>Already have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.footerLink}>Inicia sesión</Text>
+                <Text style={styles.footerLink}>Log in</Text>
               </TouchableOpacity>
             </View>
           </View>

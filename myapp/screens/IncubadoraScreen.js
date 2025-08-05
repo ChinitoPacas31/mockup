@@ -43,7 +43,7 @@ export default function IncubadorasScreen({ route, navigation }) {
       const res = await axios.get(`${API_BASE_URL}/api/incubadoras/${userId}`);
       setIncubadoras(res.data);
     } catch (error) {
-      console.error('Error cargando incubadoras:', error);
+      console.error('Error loading incubators:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -87,12 +87,12 @@ export default function IncubadorasScreen({ route, navigation }) {
         {item.activa ? (
           <View style={styles.activeStatus}>
             <Ionicons name="checkmark-circle" size={60} color="#38A169" />
-            <Text style={styles.statusLabel}>ACTIVA</Text>
+            <Text style={styles.statusLabel}>ACTIVE</Text>
           </View>
         ) : (
           <View style={styles.inactiveStatus}>
             <Ionicons name="close-circle" size={60} color="#E53E3E" />
-            <Text style={styles.statusLabel}>INACTIVA</Text>
+            <Text style={styles.statusLabel}>INACTIVE</Text>
           </View>
         )}
       </View>
@@ -110,7 +110,7 @@ export default function IncubadorasScreen({ route, navigation }) {
 
         <View style={styles.infoRow}>
           <Ionicons name="egg-outline" size={16} color="#4A5568" />
-          <Text style={styles.infoText}>{item.tipo_ave || 'No especificado'}</Text>
+          <Text style={styles.infoText}>{item.tipo_ave || 'Not specified'}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -148,7 +148,7 @@ export default function IncubadorasScreen({ route, navigation }) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6C63FF" />
-        <Text style={styles.loadingText}>Cargando incubadoras...</Text>
+        <Text style={styles.loadingText}>Loading incubators...</Text>
       </View>
     );
   }
@@ -165,7 +165,7 @@ export default function IncubadorasScreen({ route, navigation }) {
             <Ionicons name="person" size={24} color="#FFF" />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Mis Incubadoras</Text>
+          <Text style={styles.title}>My Incubators</Text>
 
           <TouchableOpacity
             style={styles.addButton}
@@ -180,7 +180,7 @@ export default function IncubadorasScreen({ route, navigation }) {
           <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar incubadoras..."
+            placeholder="Search for incubators..."
             placeholderTextColor="#A0AEC0"
             value={searchTerm}
             onChangeText={(text) => {
@@ -203,11 +203,11 @@ export default function IncubadorasScreen({ route, navigation }) {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{incubadoras.filter(i => i.activa).length}</Text>
-            <Text style={styles.statLabel}>Activas</Text>
+            <Text style={styles.statLabel}>Active</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{incubadoras.filter(i => !i.activa).length}</Text>
-            <Text style={styles.statLabel}>Inactivas</Text>
+            <Text style={styles.statLabel}>Inactive</Text>
           </View>
         </View>
 
@@ -215,18 +215,18 @@ export default function IncubadorasScreen({ route, navigation }) {
         {filteredIncubadoras.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="egg-outline" size={80} color="#E2E8F0" />
-            <Text style={styles.emptyTitle}>No se encontraron incubadoras</Text>
+            <Text style={styles.emptyTitle}>No incubators were found.</Text>
             <Text style={styles.emptySubtitle}>
               {searchTerm.length > 0 
-                ? "Prueba con otros términos de búsqueda" 
-                : "Agrega una nueva incubadora para comenzar"}
+                ? "Try other search terms" 
+                : "Add a new incubator to get started"}
             </Text>
             {searchTerm.length === 0 && (
               <TouchableOpacity 
                 style={styles.addFirstButton}
                 onPress={() => navigation.navigate('AgregarIncubadora', { userId })}
               >
-                <Text style={styles.addFirstButtonText}>Agregar Incubadora</Text>
+                <Text style={styles.addFirstButtonText}>Add Incubator</Text>
               </TouchableOpacity>
             )}
           </View>

@@ -25,11 +25,11 @@ export default function CambiarImagenScreen({ route, navigation }) {
         if (data.success) {
           setPerfil(data);
         } else {
-          Alert.alert('Error', 'No se pudo cargar el perfil');
+          Alert.alert('Error', 'The profile could not be loaded.');
         }
       })
       .catch(() => {
-        Alert.alert('Error', 'Error al obtener perfil');
+        Alert.alert('Error', 'Error obtaining profile');
       });
   }, []);
 
@@ -37,7 +37,7 @@ export default function CambiarImagenScreen({ route, navigation }) {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permissionResult.granted) {
-        Alert.alert('Permiso denegado', 'Se requiere acceso a la galería para seleccionar imágenes.');
+        Alert.alert('Permiso denegado', 'Access to the gallery is required to select images.');
         return;
       }
   
@@ -47,22 +47,22 @@ export default function CambiarImagenScreen({ route, navigation }) {
         quality: 1,
       });
   
-      console.log('Resultado de selección:', result);
+      console.log('Selection result:', result);
   
       if (!result.cancelled && result.assets && result.assets.length > 0) {
-        console.log('URI seleccionada:', result.assets[0].uri);
+        console.log('Selected URI:', result.assets[0].uri);
         setImagen(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error en pickImage:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      console.error('Error in pickImage:', error);
+      Alert.alert('Error', 'The image could not be selected.');
     }
   };
   
 
   const subirImagen = async () => {
     if (!imagen) {
-      Alert.alert('Error', 'Selecciona una imagen primero');
+      Alert.alert('Error', 'Select an image first');
       return;
     }
 
@@ -97,15 +97,15 @@ export default function CambiarImagenScreen({ route, navigation }) {
 
       const data = await res.json();
       if (data.success) {
-        Alert.alert('Éxito', 'Imagen actualizada correctamente');
+        Alert.alert('Éxito', 'Image updated correctly');
         setPerfil(prev => ({ ...prev, imagen_perfil: data.imagen_perfil }));
         setImagen(null);
       } else {
-        Alert.alert('Error', data.message || 'Error al subir imagen');
+        Alert.alert('Error', data.message || 'Error uploading image');
       }
     } catch (error) {
-      console.error('Error al subir imagen:', error);
-      Alert.alert('Error', 'Error al subir imagen');
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Error uploading image');
     } finally {
       setSubiendo(false);
     }
@@ -130,7 +130,7 @@ export default function CambiarImagenScreen({ route, navigation }) {
       )}
 
       <View style={{ marginTop: 30, width: '60%' }}>
-        <Button title="Seleccionar imagen" onPress={pickImage} />
+        <Button title="Select image" onPress={pickImage} />
       </View>
 
       {subiendo ? (
@@ -141,7 +141,7 @@ export default function CambiarImagenScreen({ route, navigation }) {
         />
       ) : (
         <View style={{ marginTop: 20, width: '60%' }}>
-          <Button title="Subir imagen" onPress={subirImagen} disabled={!imagen} />
+          <Button title="Upload image" onPress={subirImagen} disabled={!imagen} />
         </View>
       )}
     </View>

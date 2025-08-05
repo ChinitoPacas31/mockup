@@ -66,7 +66,7 @@ export default function LoginScreen({ navigation }) {
               resizeMode="contain"
             />
             
-            <Text style={styles.subtitle}>Control de Incubadoras</Text>
+            <Text style={styles.subtitle}>Incubator Control</Text>
 
             <View style={styles.inputContainer}>
               <Icon 
@@ -128,7 +128,7 @@ export default function LoginScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>Log in</Text>
               )}
             </TouchableOpacity>
 
@@ -136,7 +136,7 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
-                <Text style={styles.footerLink}>Regístrate</Text>
+                <Text style={styles.footerLink}>Sign up</Text>
               </TouchableOpacity>
             </View>
           </View>

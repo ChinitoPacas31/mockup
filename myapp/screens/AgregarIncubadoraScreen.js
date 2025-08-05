@@ -33,7 +33,7 @@ export default function AgregarIncubadora({ navigation, route }) {
 
   const handleSubmit = async () => {
     if (!formData.codigo || !formData.nombre || !formData.ubicacion) {
-      Alert.alert('Error', 'Todos los campos son obligatorios');
+      Alert.alert('Error', 'All fields are required');
       return;
     }
   
@@ -47,24 +47,24 @@ export default function AgregarIncubadora({ navigation, route }) {
       });
 
       if (response.data.success) {
-        Alert.alert('Éxito', 'Incubadora agregada correctamente', [
+        Alert.alert('Éxito', 'Incubator added successfully', [
           { 
             text: 'OK', 
             onPress: () => navigation.navigate('Incubadoras', { userId }) 
           }
         ]);
       } else {
-        Alert.alert('Error', response.data.message || 'Error al agregar incubadora');
+        Alert.alert('Error', response.data.message || 'Error adding incubator');
       }
     } catch (error) {
-      console.error('Error al agregar incubadora:', error);
-      let errorMessage = 'Error al agregar incubadora';
+      console.error('Error adding incubator:', error);
+      let errorMessage = 'Error adding incubator';
       
       if (error.response) {
         if (error.response.status === 400) {
-          errorMessage = error.response.data.message || 'Código inválido o ya existe';
+          errorMessage = error.response.data.message || 'Invalid code or already exists';
         } else if (error.response.status === 500) {
-          errorMessage = 'Error en el servidor';
+          errorMessage = 'Server error';
         }
       }
       
@@ -92,7 +92,7 @@ export default function AgregarIncubadora({ navigation, route }) {
           >
             <Ionicons name="arrow-back" size={24} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Nueva Incubadora</Text>
+          <Text style={styles.title}>New Incubator</Text>
           <View style={styles.headerRightPlaceholder} />
         </View>
 
@@ -100,14 +100,14 @@ export default function AgregarIncubadora({ navigation, route }) {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="information-circle" size={24} color="#6C63FF" />
-            <Text style={styles.cardTitle}>Información Básica</Text>
+            <Text style={styles.cardTitle}>Basic Information</Text>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Código de Activación</Text>
+            <Text style={styles.label}>Activation Code</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ingresa el código de la incubadora"
+              placeholder="Enter the incubator code"
               placeholderTextColor="#A0AEC0"
               value={formData.codigo}
               onChangeText={(text) => handleChange('codigo', text)}
@@ -116,15 +116,15 @@ export default function AgregarIncubadora({ navigation, route }) {
               returnKeyType="next"
             />
             <Text style={styles.hintText}>
-              Este código viene con tu dispositivo físico
+              This code comes with your physical device.
             </Text>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Nombre</Text>
+            <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Incubadora Principal"
+              placeholder="Example: Main Incubator"
               placeholderTextColor="#A0AEC0"
               value={formData.nombre}
               onChangeText={(text) => handleChange('nombre', text)}
@@ -133,10 +133,10 @@ export default function AgregarIncubadora({ navigation, route }) {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Ubicación</Text>
+            <Text style={styles.label}>Location</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Sala de incubación, Granja"
+              placeholder="Example: Incubation room, Farm"
               placeholderTextColor="#A0AEC0"
               value={formData.ubicacion}
               onChangeText={(text) => handleChange('ubicacion', text)}
@@ -159,7 +159,7 @@ export default function AgregarIncubadora({ navigation, route }) {
           ) : (
             <>
               <Ionicons name="save-outline" size={20} color="#FFF" />
-              <Text style={styles.submitButtonText}>Guardar Incubadora</Text>
+              <Text style={styles.submitButtonText}>Save Incubator</Text>
             </>
           )}
         </TouchableOpacity>

@@ -32,11 +32,11 @@ export default function PerfilScreen({ route, navigation }) {
       if (data.success) {
         setPerfil(data);
       } else {
-        Alert.alert('Error', 'No se pudo cargar el perfil');
+        Alert.alert('Error', 'The profile could not be loaded.');
       }
     } catch (error) {
-      console.log('Error cargando perfil:', error);
-      Alert.alert('Error', 'Ocurrió un error al cargar el perfil');
+      console.log('Error loading profile:', error);
+      Alert.alert('Error', 'An error occurred while loading the profile.');
     } finally {
       setLoading(false);
     }
@@ -44,12 +44,12 @@ export default function PerfilScreen({ route, navigation }) {
 
   const logout = async () => {
     Alert.alert(
-      'Cerrar sesión',
-      '¿Estás seguro que quieres cerrar sesión?',
+      'Log out',
+      'Are you sure you want to log out?',
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Cerrar sesión',
+          text: 'Log out',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -60,8 +60,8 @@ export default function PerfilScreen({ route, navigation }) {
                 routes: [{ name: 'Login' }],
               });
             } catch (e) {
-              console.log('Error al cerrar sesión:', e);
-              Alert.alert('Error', 'No se pudo cerrar sesión correctamente');
+              console.log('Error logging out:', e);
+              Alert.alert('Error', 'Unable to log out successfully');
             }
           },
         },
@@ -73,7 +73,7 @@ export default function PerfilScreen({ route, navigation }) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6C63FF" />
-        <Text style={styles.loadingText}>Cargando perfil...</Text>
+        <Text style={styles.loadingText}>Loading profile...</Text>
       </View>
     );
   }
@@ -81,7 +81,7 @@ export default function PerfilScreen({ route, navigation }) {
   if (!perfil) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>No se encontró el perfil</Text>
+        <Text style={styles.errorText}>Profile not found</Text>
       </View>
     );
   }
@@ -96,7 +96,7 @@ export default function PerfilScreen({ route, navigation }) {
         >
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.title}>Mi Perfil</Text>
+        <Text style={styles.title}>My Profile</Text>
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={logout}
@@ -120,13 +120,13 @@ export default function PerfilScreen({ route, navigation }) {
           onPress={() => navigation.navigate('CambiarImagen', { userId })}
         >
           <Ionicons name="camera" size={20} color="#FFF" />
-          <Text style={styles.changeImageText}>Cambiar imagen</Text>
+          <Text style={styles.changeImageText}>Change image</Text>
         </TouchableOpacity>
       </View>
 
       {/* Información personal */}
       <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>Información Personal</Text>
+        <Text style={styles.infoTitle}>Personal Information</Text>
 
         <View style={styles.infoRow}>
           <Ionicons name="person" size={20} color="#6C63FF" />
@@ -143,7 +143,7 @@ export default function PerfilScreen({ route, navigation }) {
           onPress={() => navigation.navigate('EditarPerfil', { userId })}
         >
           <Ionicons name="create-outline" size={20} color="#FFF" />
-          <Text style={styles.editProfileText}>Editar Perfil</Text>
+          <Text style={styles.editProfileText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
     </View>

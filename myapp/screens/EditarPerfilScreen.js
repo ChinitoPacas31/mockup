@@ -35,11 +35,11 @@ export default function EditarPerfilScreen({ route, navigation }) {
         setNombre(data.nombre);
         setEmail(data.email);
       } else {
-        Alert.alert('Error', 'No se pudo cargar el perfil');
+        Alert.alert('Error', 'The profile could not be loaded.');
       }
     } catch (error) {
-      console.log('Error cargando perfil:', error);
-      Alert.alert('Error', 'Error al cargar el perfil');
+      console.log('Error loading profile:', error);
+      Alert.alert('Error', 'Error loading profile');
     } finally {
       setLoading(false);
     }
@@ -52,11 +52,11 @@ export default function EditarPerfilScreen({ route, navigation }) {
 
   const guardarCambios = async () => {
     if (!nombre.trim() || !email.trim()) {
-      Alert.alert('Validación', 'Nombre y correo son obligatorios.');
+      Alert.alert('Validación', 'Name and email address are required.');
       return;
     }
     if (!validarEmail(email)) {
-      Alert.alert('Validación', 'Correo electrónico no es válido.');
+      Alert.alert('Validación', 'Email address is invalid.');
       return;
     }
 
@@ -71,18 +71,18 @@ export default function EditarPerfilScreen({ route, navigation }) {
       });
       const data = await res.json();
       if (data.success) {
-        Alert.alert('Éxito', 'Perfil actualizado correctamente', [
+        Alert.alert('Éxito', 'Profile successfully updated', [
           {
             text: 'OK',
             onPress: () => navigation.goBack(),
           },
         ]);
       } else {
-        Alert.alert('Error', 'No se pudo actualizar el perfil');
+        Alert.alert('Error', 'The profile could not be updated.');
       }
     } catch (error) {
-      console.log('Error actualizando perfil:', error);
-      Alert.alert('Error', 'Error al actualizar el perfil');
+      console.log('Error updating profile:', error);
+      Alert.alert('Error', 'Error updating profile');
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export default function EditarPerfilScreen({ route, navigation }) {
         >
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.title}>Editar Perfil</Text>
+        <Text style={styles.title}>Edit Profile</Text>
         <View style={{ width: 48 }} />
       </View>
 
@@ -107,25 +107,25 @@ export default function EditarPerfilScreen({ route, navigation }) {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.label}>Nombre</Text>
+          <Text style={styles.label}>Name</Text>
           <TextInput
             style={styles.input}
             value={nombre}
             onChangeText={setNombre}
-            placeholder="Escribe tu nombre"
+            placeholder="Write your name"
             autoCapitalize="words"
           />
 
-          <Text style={styles.label}>Correo electrónico</Text>
+          <Text style={styles.label}>E-mail</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="ejemplo@correo.com"
+            placeholder="example@gmail.com"
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <Text style={styles.label}>Contraseña</Text>
+          <Text style={styles.label}>Password</Text>
             <TextInput
             style={styles.input}
             value={password}
@@ -138,7 +138,7 @@ export default function EditarPerfilScreen({ route, navigation }) {
             <ActivityIndicator size="large" color="#6C63FF" style={{ marginTop: 20 }} />
           ) : (
             <TouchableOpacity style={styles.saveButton} onPress={guardarCambios}>
-              <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
             </TouchableOpacity>
           )}
         </ScrollView>

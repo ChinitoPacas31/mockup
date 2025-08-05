@@ -47,7 +47,7 @@ export default function DetalleIncubadora({ route, navigation }) {
         setRegistros(registrosRes.data);
       }
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function DetalleIncubadora({ route, navigation }) {
         const res = await axios.get(`${API_BASE_URL}/api/aves`);
         setAves(res.data);
       } catch (error) {
-        console.error('Error cargando aves:', error);
+        console.error('Error loading birds:', error);
       }
     };
     cargarAves();
@@ -90,7 +90,7 @@ export default function DetalleIncubadora({ route, navigation }) {
 
   const iniciarCiclo = async () => {
     if (!aveSeleccionada) {
-      Alert.alert('Error', 'Selecciona un tipo de ave');
+      Alert.alert('Error', 'Select a type of bird');
       return;
     }
 
@@ -105,14 +105,14 @@ export default function DetalleIncubadora({ route, navigation }) {
         setAveSeleccionada(null);
       }
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.message || 'Error al iniciar ciclo');
+      Alert.alert('Error', error.response?.data?.message || 'Error starting cycle');
     }
   };
 
   const apagarIncubadora = async () => {
     Alert.alert(
-      'Apagar incubadora',
-      '¿Deseas descargar un archivo con los registros antes de apagar?',
+      'Turn off incubator',
+      'Would you like to download a file with the records before shutting down?',
       [
         {
           text: 'No',
@@ -120,11 +120,11 @@ export default function DetalleIncubadora({ route, navigation }) {
             try {
               const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
               if (res.data.success) {
-                Alert.alert('Éxito', 'Incubadora apagada');
+                Alert.alert('Éxito', 'Incubator turned off');
                 await cargarDatosIncubadora();
               }
             } catch (error) {
-              Alert.alert('Error', 'No se pudo apagar la incubadora');
+              Alert.alert('Error', 'The incubator could not be turned off.');
             }
           },
           style: 'destructive'
@@ -143,20 +143,20 @@ export default function DetalleIncubadora({ route, navigation }) {
                 setTimeout(async () => {
                   const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
                   if (res.data.success) {
-                    Alert.alert('Éxito', 'Archivo descargado e incubadora apagada');
+                    Alert.alert('Éxito', 'File downloaded and incubator turned off');
                     await cargarDatosIncubadora();
                   }
                 }, 2000);
               } else {
-                Alert.alert('Error', 'No se pudo abrir el enlace de descarga');
+                Alert.alert('Error', 'The download link could not be opened.');
               }
             } catch (error) {
-              Alert.alert('Error', 'No se pudo completar la operación');
+              Alert.alert('Error', 'The operation could not be completed.');
             }
           }
         },
         {
-          text: 'Cancelar',
+          text: 'Cancel',
           style: 'cancel'
         }
       ]
@@ -167,7 +167,7 @@ export default function DetalleIncubadora({ route, navigation }) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6C63FF" />
-        <Text style={styles.loadingText}>Cargando detalles...</Text>
+        <Text style={styles.loadingText}>Loading details...</Text>
       </View>
     );
   }
@@ -176,14 +176,14 @@ export default function DetalleIncubadora({ route, navigation }) {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="warning-outline" size={60} color="#FF6B6B" />
-        <Text style={styles.errorTitle}>No se encontró la incubadora</Text>
-        <Text style={styles.errorSubtitle}>La incubadora solicitada no está disponible</Text>
+        <Text style={styles.errorTitle}>The incubator was not found.</Text>
+        <Text style={styles.errorSubtitle}>The requested incubator is not available.</Text>
         <TouchableOpacity 
           style={styles.primaryButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={20} color="#FFF" style={styles.buttonIcon} />
-          <Text style={styles.primaryButtonText}>Volver atrás</Text>
+          <Text style={styles.primaryButtonText}>Go back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -202,7 +202,7 @@ export default function DetalleIncubadora({ route, navigation }) {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Selecciona el tipo de ave</Text>
+            <Text style={styles.modalTitle}>Select the type of bird</Text>
             
             <ScrollView contentContainerStyle={styles.avesContainer}>
               {aves.map(ave => (
@@ -230,7 +230,7 @@ export default function DetalleIncubadora({ route, navigation }) {
                     ]}>
                       {ave.nombre}
                     </Text>
-                    <Text style={styles.aveDays}>{ave.dias_incubacion} días de incubación</Text>
+                    <Text style={styles.aveDays}>{ave.dias_incubacion} incubation days</Text>
                     <Text style={styles.aveDetails}>
                       Temp: {ave.temperatura_ideal}°C - Hum: {ave.humedad_ideal}%
                     </Text>
@@ -255,7 +255,7 @@ export default function DetalleIncubadora({ route, navigation }) {
                   setShowModalAve(false);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -267,7 +267,7 @@ export default function DetalleIncubadora({ route, navigation }) {
                 onPress={iniciarCiclo}
                 disabled={!aveSeleccionada}
               >
-                <Text style={styles.confirmButtonText}>Iniciar ciclo</Text>
+                <Text style={styles.confirmButtonText}>Start cycle</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -297,36 +297,36 @@ export default function DetalleIncubadora({ route, navigation }) {
             color="#FFF" 
           />
           <Text style={styles.statusText}>
-            {finalizado ? 'FINALIZADO' : (incubadora.activa ? 'ACTIVA' : 'INACTIVA')}
+            {finalizado ? 'FINISHED' : (incubadora.activa ? 'ACTIVE' : 'INACTIVE')}
           </Text>
         </View>
 
         <View style={styles.infoGrid}>
           <View style={styles.infoItem}>
             <Ionicons name="barcode-outline" size={24} color="#6C63FF" />
-            <Text style={styles.infoLabel}>Código</Text>
+            <Text style={styles.infoLabel}>Code</Text>
             <Text style={styles.infoValue}>{incubadora.codigo}</Text>
           </View>
 
           <View style={styles.infoItem}>
             <Ionicons name="location-outline" size={24} color="#6C63FF" />
-            <Text style={styles.infoLabel}>Ubicación</Text>
+            <Text style={styles.infoLabel}>Location</Text>
             <Text style={styles.infoValue}>{incubadora.ubicacion}</Text>
           </View>
 
           <View style={styles.infoItem}>
             <Ionicons name="egg-outline" size={24} color="#6C63FF" />
-            <Text style={styles.infoLabel}>Tipo de ave</Text>
-            <Text style={styles.infoValue}>{ave?.nombre || 'No asignado'}</Text>
+            <Text style={styles.infoLabel}>Type of bird</Text>
+            <Text style={styles.infoValue}>{ave?.nombre || 'Not assigned'}</Text>
           </View>
 
           <View style={styles.infoItem}>
             <Ionicons name="calendar-outline" size={24} color="#6C63FF" />
-            <Text style={styles.infoLabel}>Días de incubación</Text>
+            <Text style={styles.infoLabel}>Incubation days</Text>
             <Text style={styles.infoValue}>
               {incubadora.activa && ave
                 ? `${diasTranscurridos}/${ave.dias_incubacion}`
-                : 'No activa'}
+                : 'Not active'}
             </Text>
           </View>
         </View>
@@ -336,24 +336,24 @@ export default function DetalleIncubadora({ route, navigation }) {
             style={[styles.actionButton, styles.finishedButton]}
           >
             <Ionicons name="checkmark-done" size={20} color="#FFF" style={styles.buttonIcon} />
-            <Text style={styles.actionButtonText}>Ciclo completado</Text>
+            <Text style={styles.actionButtonText}>Cycle completed</Text>
           </TouchableOpacity>
         ) : incubadora.activa ? (
           <TouchableOpacity
             onPress={() => {
               Alert.alert(
-                'Confirmar',
-                '¿Estás seguro que deseas apagar la incubadora?',
+                'Confirm',
+                'Are you sure you want to turn off the incubator?',
                 [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Apagar', onPress: apagarIncubadora, style: 'destructive' }
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Turn off', onPress: apagarIncubadora, style: 'destructive' }
                 ]
               );
             }}
             style={[styles.actionButton, styles.deactivateButton]}
           >
             <Ionicons name="power" size={20} color="#FFF" style={styles.buttonIcon} />
-            <Text style={styles.actionButtonText}>Apagar incubadora</Text>
+            <Text style={styles.actionButtonText}>Turn off incubator</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -361,7 +361,7 @@ export default function DetalleIncubadora({ route, navigation }) {
             style={[styles.actionButton, styles.activateButton]}
           >
             <Ionicons name="play" size={20} color="#FFF" style={styles.buttonIcon} />
-            <Text style={styles.actionButtonText}>Iniciar ciclo</Text>
+            <Text style={styles.actionButtonText}>Start cycle</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -371,7 +371,7 @@ export default function DetalleIncubadora({ route, navigation }) {
         onPress={() => setShowRegistros(!showRegistros)}
       >
         <Text style={styles.toggleSectionText}>
-          {showRegistros ? 'Ocultar registros' : 'Mostrar registros'}
+          {showRegistros ? 'Hide records' : 'Show records'}
         </Text>
         <Ionicons 
           name={showRegistros ? 'chevron-up' : 'chevron-down'} 
@@ -384,7 +384,7 @@ export default function DetalleIncubadora({ route, navigation }) {
         <View style={styles.registrosContainer}>
           <View style={styles.sectionHeader}>
             <Ionicons name="analytics-outline" size={24} color="#6C63FF" />
-            <Text style={styles.sectionTitle}>Historial de Monitoreo</Text>
+            <Text style={styles.sectionTitle}>Monitoring History</Text>
           </View>
 
           {registros.length > 0 ? (
@@ -409,7 +409,7 @@ export default function DetalleIncubadora({ route, navigation }) {
                         strokeWidth: 3,
                       },
                     ],
-                    legend: ['Temperatura (°C)', 'Humedad (%)'],
+                    legend: ['Temperature (°C)', 'Humidity (%)'],
                   }}
                   width={Math.max(Dimensions.get('window').width - 40, registros.length * 2)}
                   height={240}
@@ -436,26 +436,26 @@ export default function DetalleIncubadora({ route, navigation }) {
                   <Text style={[styles.metricValue, {color: '#FF6B6B'}]}>
                     {Math.max(...registros.map(r => r.temperatura)).toFixed(1)}°C
                   </Text>
-                  <Text style={styles.metricLabel}>Temp. máxima</Text>
+                  <Text style={styles.metricLabel}>Max temp</Text>
                 </View>
                 <View style={styles.metricItem}>
                   <Text style={[styles.metricValue, {color: '#4D96FF'}]}>
                     {Math.max(...registros.map(r => r.humedad)).toFixed(1)}%
                   </Text>
-                  <Text style={styles.metricLabel}>Humedad máx.</Text>
+                  <Text style={styles.metricLabel}>Max hum</Text>
                 </View>
                 <View style={styles.metricItem}>
                   <Text style={[styles.metricValue, {color: '#38A169'}]}>
                     {Math.min(...registros.map(r => r.temperatura)).toFixed(1)}°C
                   </Text>
-                  <Text style={styles.metricLabel}>Temp. mínima</Text>
+                  <Text style={styles.metricLabel}>Min temp</Text>
                 </View>
               </View>
             </>
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="document-text-outline" size={48} color="#CBD5E0" />
-              <Text style={styles.emptyText}>No hay registros disponibles</Text>
+              <Text style={styles.emptyText}>No records available</Text>
             </View>
           )}
         </View>
