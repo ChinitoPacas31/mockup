@@ -67,14 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (data.success) {
-        alert("Ciclo iniciado correctamente.");
+        alert("Cycle started successfully.");
         location.reload();
       } else {
         alert("Error: " + data.message);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al iniciar el ciclo.");
+      alert("Error starting cycle.");
     } finally {
       cerrarModal();
     }
