@@ -153,23 +153,22 @@
     <div class="modal-body">
       <div class="birds-grid">
         {% for ave in aves %}
-          <label class="bird-card">
+          <label class="bird-card" data-ave-name="{{ ave.nombre }}">
             <input 
               type="radio" 
               name="selectedBird" 
               value="{{ ave._id }}" 
+              id="ave-{{ ave._id }}"
               onchange="updateSelectedBird(this)"
             >
             <div class="card-content">
-              {% if ave.imagen %}
-                <div class="image-container">
+              <div class="image-container bird-image-container">
+                {% if ave.imagen %}
                   <img src="{{ ave.imagen }}" alt="{{ ave.nombre }}" class="bird-image">
-                </div>
-              {% else %}
-                <div class="image-container placeholder">
+                {% else %}
                   <i class="fas fa-dove"></i>
-                </div>
-              {% endif %}
+                {% endif %}
+              </div>
               <div class="bird-info">
                 <span class="bird-name">{{ ave.nombre }}</span>
                 <div class="bird-specs">
@@ -191,7 +190,6 @@
   </div>
 </div>
   <div id="incubadora" data-codigo="{{ incubadora.codigo }}" style="display:none;"></div>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
   <script src="{{ url_for('static', filename='js/incubadora_detalle.js') }}"></script>
 
