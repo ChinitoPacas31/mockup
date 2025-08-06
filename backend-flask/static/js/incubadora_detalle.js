@@ -1,7 +1,89 @@
+
 document.addEventListener('DOMContentLoaded', () => {
   const incubadoraEl = document.getElementById('incubadora');
   const codigoIncubadora = incubadoraEl.getAttribute('data-codigo');
 
+  // Mapeo de nombres de aves a rutas de imágenes locales
+  const avesImagenes = {
+    'Pato': '/static/images/aves/pato.png',
+    'Codorniz': '/static/images/aves/codormis.png',
+    'Ganso': '/static/images/aves/ganso.png',
+    'Gallina': '/static/images/aves/gallina.png'
+  };
+
+  // Función para cargar imágenes locales
+  function cargarImagenesAves() {
+    document.querySelectorAll('.bird-card').forEach(card => {
+      const nombreAve = card.dataset.aveName;
+      const contenedorImagen = card.querySelector('.bird-image-container');
+      
+      if (avesImagenes[nombreAve]) {
+        contenedorImagen.innerHTML = `
+          <img src="${avesImagenes[nombreAve]}" 
+               alt="${nombreAve}" 
+               class="bird-image"
+               onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas fa-dove\'></i>'">`;
+      } else {
+        contenedorImagen.innerHTML = '<i class="fas fa-dove"></i>';
+      }
+    });
+  }
+
+  // Configurar observador para el modal
+  const modal = document.getElementById('modalAve');
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'style' && modal.style.display === 'block') {
+        cargarImagenesAves();
+      }
+    });
+  });
+  observer.observe(modal, { attributes: true });
+
+  // Función para iniciar ciclo
+  window.iniciarCiclo = function() {
+    modal.style.display = 'block';
+    cargarImagenesAves();
+  };
+
+  // Función para confirmar selección
+  window.confirmarSeleccionAve = async function() {
+    const selectedRadio = document.querySelector('input[name="selectedBird"]:checked');
+    
+    if (!selectedRadio) {
+      alert("Por favor selecciona un tipo de ave.");
+      return;
+    }
+
+    const aveId = selectedRadio.value;
+    
+    try {
+      const response = await fetch(`/api/incubadora/${codigoIncubadora}/iniciar-ciclo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ave_id: aveId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Ciclo iniciado correctamente.");
+        location.reload();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al iniciar el ciclo.");
+    } finally {
+      cerrarModal();
+    }
+  };
+
+  // Función para cerrar modal
+  window.cerrarModal = function() {
+    modal.style.display = 'none';
+  };
   // Función para obtener registros y renderizar gráfico
   async function fetchRegistros() {
     try {
