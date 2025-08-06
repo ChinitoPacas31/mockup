@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: labels,
         datasets: [
           {
-            label: 'Temperatura (°C)',
+            label: 'Temperature (°C)',
             data: temperaturas,
             borderColor: '#e74c3c',
             backgroundColor: 'rgba(231, 76, 60, 0.1)',
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             yAxisID: 'y',
           },
           {
-            label: 'Humedad (%)',
+            label: 'Humidity (%)',
             data: humedades,
             borderColor: '#3498db',
             backgroundColor: 'rgba(52, 152, 219, 0.1)',
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             max: 50,
             title: {
               display: true,
-              text: 'Temperatura (°C)'
+              text: 'Temperature (°C)'
             }
           },
           y1: {
@@ -176,13 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             title: {
               display: true,
-              text: 'Humedad (%)'
+              text: 'Humidity (%)'
             }
           },
           x: {
             title: {
               display: true,
-              text: 'Hora'
+              text: 'Time'
             }
           }
         },
@@ -241,7 +241,7 @@ async function iniciarCiclo() {
 // Función para apagar la incubadora
 // Función para apagar la incubadora
 async function confirmarApagado(codigoIncubadora) {
-  const descargar = confirm("¿Deseas descargar un archivo con los registros antes de apagar la incubadora?\n\nSi seleccionas 'Aceptar', se descargará un archivo CSV con los registros.\nSi seleccionas 'Cancelar', se apagará la incubadora sin descargar los registros.");
+  const descargar = confirm("Would you like to download a file with the records before turning off the incubator?\n\nIf you select ‘Accept’, a CSV file containing the records will be downloaded.\nIf you select ‘Cancel’, the incubator will shut down without downloading the logs.");
   
   try {
     if (descargar) {
@@ -261,14 +261,14 @@ async function confirmarApagado(codigoIncubadora) {
     const data = await response.json();
 
     if (data.success) {
-      alert(descargar ? "Archivo descargado e incubadora apagada correctamente." : "Incubadora apagada correctamente.");
+      alert(descargar ? "File downloaded and incubator shut down correctly." : "Incubator shut down correctly.");
       location.reload();
     } else {
       alert("Error: " + data.message);
     }
   } catch (error) {
     console.error("Error:", error);
-    alert("Error al apagar la incubadora.");
+    alert("Error when shutting down the incubator.");
   }
 }
 
@@ -281,7 +281,7 @@ async function iniciarCiclo() {
     const aveId = document.getElementById('tipoAveSelect').value;
     
     if (!aveId) {
-      alert("Por favor selecciona un tipo de ave.");
+      alert("Please select a type of bird.");
       return;
     }
 
@@ -295,14 +295,14 @@ async function iniciarCiclo() {
       const data = await response.json();
 
       if (data.success) {
-        alert("Ciclo iniciado correctamente.");
+        alert("Cycle started successfully.");
         location.reload();
       } else {
         alert("Error: " + data.message);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al iniciar el ciclo.");
+      alert("Error starting cycle.");
     } finally {
       cerrarModal();
     }
