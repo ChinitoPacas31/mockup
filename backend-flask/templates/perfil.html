@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mi Perfil</title>
+  <title>My Profile</title>
   <link rel="stylesheet" href="/static/css/perfil.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -11,15 +11,15 @@
   <header class="profile-header">
     <div class="container header-content">
       <div class="profile-header-content">
-        <h1><i class="fas fa-user-circle"></i> Mi Perfil</h1>
-        <p class="profile-welcome">Bienvenido a tu espacio personal</p>
+        <h1><i class="fas fa-user-circle"></i>My Profile</h1>
+        <p class="profile-welcome">Welcome to your personal space</p>
       </div>
       <div class="profile-actions">
         <a href="{{ url_for('home') }}" class="btn btn-gradient">
-          <i class="fas fa-arrow-left"></i> Volver al inicio
+          <i class="fas fa-arrow-left"></i> Back to top
         </a>
         <a href="{{ url_for('logout') }}" class="btn btn-danger">
-          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+          <i class="fas fa-sign-out-alt"></i> Log out
         </a>
       </div>
     </div>
@@ -32,7 +32,7 @@
         <!-- Imagen de perfil -->
         <div class="profile-card profile-image-card">
           <div class="card-header">
-            <h2><i class="fas fa-image"></i> Foto de Perfil</h2>
+            <h2><i class="fas fa-image"></i> Profile Photo</h2>
           </div>
           <div class="card-body" style="text-align: center;">
             {% if imagen_perfil %}
@@ -42,7 +42,7 @@
             {% endif %}
             <div style="margin-top: 10px;">
               <a href="{{ url_for('cambiar_imagen') }}" class="btn btn-gradient">
-                <i class="fas fa-upload"></i> Cambiar imagen
+                <i class="fas fa-upload"></i> Change image
               </a>
             </div>
           </div>
@@ -51,13 +51,13 @@
         <!-- Información personal -->
         <div class="profile-card">
           <div class="card-header">
-            <h2><i class="fas fa-id-card"></i> Información Personal</h2>
+            <h2><i class="fas fa-id-card"></i> Personal Information</h2>
           </div>
           <div class="card-body">
             <div class="profile-info-item">
               <i class="fas fa-user-tag"></i>
               <div>
-                <span class="info-label">Nombre:</span>
+                <span class="info-label">Name:</span>
                 <span class="info-value">{{ nombre }}</span>
               </div>
             </div>
@@ -70,7 +70,7 @@
             </div>
             <div style="margin-top: 15px;">
               <a href="{{ url_for('editar_perfil') }}" class="btn btn-gradient">
-                <i class="fas fa-edit"></i> Editar Perfil
+                <i class="fas fa-edit"></i> Edit Profile
               </a>
             </div>
           </div>
@@ -80,7 +80,7 @@
       <!-- Sección de actividad -->
       <div class="profile-card">
         <div class="card-header">
-          <h2><i class="fas fa-chart-line"></i> Resumen de Actividad</h2>
+          <h2><i class="fas fa-chart-line"></i> Activity Summary</h2>
         </div>
         <div class="card-body activity-grid">
           <div class="activity-item">
@@ -88,7 +88,7 @@
               <i class="fas fa-egg"></i>
             </div>
             <div class="activity-content">
-              <h3>Incubadoras registradas</h3>
+              <h3>Registered incubators</h3>
               <p>{{ total_incubadoras }}</p>
             </div>
           </div>
@@ -98,7 +98,7 @@
               <i class="fas fa-history"></i>
             </div>
             <div class="activity-content">
-              <h3>Última incubadora</h3>
+              <h3>Latest incubator</h3>
               <p>{{ ultima_incubadora }}</p>
             </div>
           </div>
@@ -108,8 +108,8 @@
               <i class="fas fa-calendar-alt"></i>
             </div>
             <div class="activity-content">
-              <h3>Miembro desde</h3>
-              <p>Junio 2025</p>
+              <h3>Member since</h3>
+              <p>June 2025</p>
             </div>
           </div>
         </div>
@@ -118,17 +118,17 @@
       <!-- Acceso rápido -->
       <div class="profile-card quick-actions-card">
         <div class="card-header">
-          <h2><i class="fas fa-bolt"></i> Acceso rápido</h2>
+          <h2><i class="fas fa-bolt"></i> Quick access</h2>
         </div>
         <div class="card-body quick-actions-grid">
           <a href="/incubadoras" class="btn btn-gradient action-btn">
-            <i class="fas fa-egg"></i> Mis Incubadoras
+            <i class="fas fa-egg"></i> My Incubators
           </a>
           <a href="/incubadoras#formulario" class="btn btn-gradient action-btn">
-            <i class="fas fa-plus-circle"></i> Agregar Incubadora
+            <i class="fas fa-plus-circle"></i> Add Incubator
           </a>
           <a href="mailto:nestium@gmail.com" class="btn btn-outline action-btn">
-            <i class="fas fa-headset"></i> Soporte
+            <i class="fas fa-headset"></i> Support
           </a>
         </div>
       </div>

@@ -15,15 +15,15 @@
       <div>
         <h1><i class="fas fa-egg"></i> {{ incubadora.nombre }}</h1>
         <div class="breadcrumb">
-          <a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Mis incubadoras</a> / Detalle
+          <a href="{{ url_for('home') }}"><i class="fas fa-home"></i> My incubators</a> / Detail
         </div>
       </div>
       <div>
         <a href="{{ url_for('home') }}" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Volver
+          <i class="fas fa-arrow-left"></i> Back
         </a>
         <a href="{{ url_for('logout') }}" class="btn btn-danger">
-          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+          <i class="fas fa-sign-out-alt"></i> Log out
         </a>
       </div>
     </div>
@@ -31,7 +31,7 @@
 
   <div class="container">
     <div class="card">
-      <h2><i class="fas fa-info-circle"></i> Información de la Incubadora</h2>
+      <h2><i class="fas fa-info-circle"></i> Incubator Information</h2>
       
       <div class="info-grid">
         <div class="info-item">
@@ -39,7 +39,7 @@
             <i class="fas fa-map-marker-alt"></i>
           </div>
           <div class="info-content">
-            <h3>Ubicación</h3>
+            <h3>Location</h3>
             <p>{{ incubadora.ubicacion }}</p>
           </div>
         </div>
@@ -49,7 +49,7 @@
             <i class="fas fa-barcode"></i>
           </div>
           <div class="info-content">
-            <h3>Código</h3>
+            <h3>Code</h3>
             <p>{{ incubadora.codigo }}</p>
           </div>
         </div>
@@ -59,15 +59,15 @@
             <i class="fas fa-power-off"></i>
           </div>
           <div class="info-content">
-            <h3>Estado</h3>
+            <h3>Status</h3>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               {% if incubadora.activa %}
                 <button id="estado-incubadora" class="btn btn-danger" onclick="confirmarApagado('{{ incubadora.codigo }}')">
-                  <i class="fas fa-power-off"></i> Apagar
+                  <i class="fas fa-power-off"></i> Turn off
                 </button>
               {% else %}
                 <button id="estado-incubadora" class="btn btn-success" onclick="iniciarCiclo()">
-                  <i class="fas fa-play"></i> Iniciar ciclo
+                  <i class="fas fa-play"></i> Start cycle
                 </button>
               {% endif %}
             </div>
@@ -81,47 +81,47 @@
     </div>
 
     <div class="card">
-      <h2><i class="fas fa-dove"></i> Especificaciones del Huevo</h2>
+      <h2><i class="fas fa-dove"></i> Egg Specifications</h2>
       
       {% if incubadora.activa %}
         {% if ave and ave.nombre %}
-          <p style="margin-bottom: 20px; color: var(--secondary-color);">Configuración óptima para {{ ave.nombre }}</p>
+          <p style="margin-bottom: 20px; color: var(--secondary-color);">Optimal configuration for {{ ave.nombre }}</p>
           
           <div class="specs-grid">
             <div class="spec-card">
-              <h3><i class="fas fa-thermometer-half"></i> Temperatura</h3>
+              <h3><i class="fas fa-thermometer-half"></i> Temperature</h3>
               <div class="spec-item">
-                <span class="spec-label">Requerida</span>
+                <span class="spec-label">Required</span>
                 <span class="spec-value temp-value">{{ ave.temperatura }} °C</span>
               </div>
               <div class="spec-item">
-                <span class="spec-label">Actual</span>
+                <span class="spec-label">Current</span>
                 <span class="spec-value temp-value">37.5 °C <i class="fas fa-check-circle" style="color: var(--success-color);"></i></span>
               </div>
             </div>
             
             <div class="spec-card">
-              <h3><i class="fas fa-tint"></i> Humedad</h3>
+              <h3><i class="fas fa-tint"></i> Humidity</h3>
               <div class="spec-item">
-                <span class="spec-label">Requerida</span>
+                <span class="spec-label">Required</span>
                 <span class="spec-value humidity-value">{{ ave.humedad }} %</span>
               </div>
               <div class="spec-item">
-                <span class="spec-label">Actual</span>
+                <span class="spec-label">Current</span>
                 <span class="spec-value humidity-value">55 % <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i></span>
               </div>
             </div>
             
             <div class="spec-card">
-              <h3><i class="fas fa-calendar-alt"></i> Incubación</h3>
+              <h3><i class="fas fa-calendar-alt"></i> Incubation</h3>
               <div class="spec-item">
-                <span class="spec-label">Días requeridos</span>
-                <span class="spec-value days-value">{{ ave.dias_incubacion }} días</span>
+                <span class="spec-label">Days required</span>
+                <span class="spec-value days-value">{{ ave.dias_incubacion }} days</span>
               </div>
               <div class="spec-item">
-                <span class="spec-label">Días transcurridos</span>
+                <span class="spec-label">Days elapsed</span>
                 <span class="spec-value days-value">
-                  {{ dias_transcurridos }} días 
+                  {{ dias_transcurridos }} days 
                   {% if finalizado %}
                     <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
                   {% else %}
@@ -133,34 +133,67 @@
           </div>
         {% else %}
           <p style="color: var(--warning-color); font-weight: 600; font-size: 1.1rem; margin-top: 20px;">
-            Tipo de ave: Desconocido - Por favor asigna un tipo de ave para ver las especificaciones
+            Bird type: Unknown - Please assign a bird type to view specifications
           </p>
         {% endif %}
       {% else %}
         <p style="color: var(--warning-color); font-weight: 600; font-size: 1.1rem; margin-top: 20px;">
-          Inicia un ciclo primero para ver las especificaciones del huevo.
+         Start a cycle first to see the egg specifications.
         </p>
       {% endif %}
     </div>
   </div>
 
-  <div id="modalAve" class="modal">
-    <div class="modal-content">
+<div id="modalAve" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-dove"></i> Select Bird Type</h3>
       <span class="close" onclick="cerrarModal()">&times;</span>
-      <h3>Selecciona el tipo de ave</h3>
-      <select id="tipoAveSelect">
-        <option value="">-- Selecciona un ave --</option>
+    </div>
+    <div class="modal-body">
+      <div class="birds-grid">
         {% for ave in aves %}
-          <option value="{{ ave._id }}">{{ ave.nombre }}</option>
+          <label class="bird-card">
+            <input 
+              type="radio" 
+              name="selectedBird" 
+              value="{{ ave._id }}" 
+              onchange="updateSelectedBird(this)"
+            >
+            <div class="card-content">
+              {% if ave.imagen %}
+                <div class="image-container">
+                  <img src="{{ ave.imagen }}" alt="{{ ave.nombre }}" class="bird-image">
+                </div>
+              {% else %}
+                <div class="image-container placeholder">
+                  <i class="fas fa-dove"></i>
+                </div>
+              {% endif %}
+              <div class="bird-info">
+                <span class="bird-name">{{ ave.nombre }}</span>
+                <div class="bird-specs">
+                  <span><i class="fas fa-thermometer-half"></i> {{ ave.temperatura }}°C</span>
+                  <span><i class="fas fa-tint"></i> {{ ave.humedad }}%</span>
+                  <span><i class="fas fa-calendar-day"></i> {{ ave.dias_incubacion }}d</span>
+                </div>
+              </div>
+            </div>
+          </label>
         {% endfor %}
-      </select>
-      <button class="btn btn-primary" style="margin-top: 15px;" onclick="confirmarSeleccionAve()">Confirmar</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="confirm-btn" onclick="confirmarSeleccionAve()">
+        <i class="fas fa-check-circle"></i> Confirm Selection
+      </button>
     </div>
   </div>
-
+</div>
   <div id="incubadora" data-codigo="{{ incubadora.codigo }}" style="display:none;"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
   <script src="{{ url_for('static', filename='js/incubadora_detalle.js') }}"></script>
+
 </body>
 </html>

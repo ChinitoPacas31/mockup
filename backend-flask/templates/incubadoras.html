@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Incubadoras - Mi Panel</title>
+  <title>Incubators - My Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/static/css/incubadoras.css">
@@ -14,15 +14,15 @@
       <img src="/static/images/logo.png" alt="Logo empresa" class="navbar-logo" />
       
       <div class="welcome-message">
-        <h1>Bienvenido: {{ nombre }}</h1>
+        <h1>Welcome: {{ nombre }}</h1>
       </div>
   
       <div class="header-buttons">
         <a href="/perfil" class="btn btn-gradient">
-          <i class="fas fa-user"></i> Perfil
+          <i class="fas fa-user"></i> Profile
         </a>
         <a href="{{ url_for('logout') }}" class="btn btn-danger">
-          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+          <i class="fas fa-sign-out-alt"></i> Log out
         </a>
       </div>
     </div>
@@ -30,7 +30,7 @@
 
   <div class="container">
     <div class="card">
-      <h2><i class="fas fa-egg"></i> Mis Incubadoras</h2>
+      <h2><i class="fas fa-egg"></i> My Incubators</h2>
       <br>
       <div class="search-bar">
         <input type="text" id="buscador" placeholder="Buscar incubadora..." />
@@ -50,7 +50,7 @@
                 <span><i class="fas fa-barcode"></i> {{ i.codigo }}</span>
                 <span id="estado-{{ i.codigo }}" class="incubadora-status {{ 'status-active' if i.activa else 'status-inactive' }}" style="cursor: default;">
                   <i class="fas fa-{{ 'check-circle' if i.activa else 'times-circle' }}"></i> 
-                  {{ "Activa" if i.activa else "Inactiva" }}
+                  {{ "Active" if i.activa else "Inactive" }}
                 </span>                
               </div>
             </div>
@@ -58,15 +58,15 @@
         {% else %}
           <div class="empty-state">
             <i class="fas fa-egg"></i>
-            <h3>No tienes incubadoras aún</h3>
-            <p>Agrega tu primera incubadora para comenzar</p>
+            <h3>You don't have any incubators yet.</h3>
+            <p>Add your first incubator to get started</p>
           </div>
         {% endfor %}
       </ul>
     </div>
 
     <div class="card pulse" id="formulario">
-      <h2><i class="fas fa-plus-circle"></i> Agregar Nueva Incubadora</h2>
+      <h2><i class="fas fa-plus-circle"></i> Add New Incubator</h2>
       {% if error %}
       <div class="alert alert-danger">
         <i class="fas fa-exclamation-circle"></i> {{ error }}
@@ -79,23 +79,23 @@
 
       <form method="POST" action="/incubadoras#formulario">
         <div class="form-group">
-          <label for="nombre"><i class="fas fa-tag"></i> Nombre:</label>
+          <label for="nombre"><i class="fas fa-tag"></i> Name:</label>
           <input type="text" id="nombre" name="nombre" required placeholder="Ej: Incubadora Principal" />
         </div>
         
         <div class="form-group">
-          <label for="ubicacion"><i class="fas fa-map-marker-alt"></i> Ubicación:</label>
+          <label for="ubicacion"><i class="fas fa-map-marker-alt"></i> Location:</label>
           <input type="text" id="ubicacion" name="ubicacion" required placeholder="Ej: Sala de incubación" />
         </div>
         
         <div class="form-group">
-          <label for="codigo"><i class="fas fa-barcode"></i> Código:</label>
+          <label for="codigo"><i class="fas fa-barcode"></i> Code:</label>
           <input type="text" id="codigo" name="codigo" required placeholder="Ej: INC-001" />
-          <small class="form-text">Ingresa el código único proporcionado con tu incubadora</small>
+          <small class="form-text">Enter the unique code provided with your incubator.</small>
         </div>
         
         <button type="submit" class="btn btn-primary">
-          <i class="fas fa-plus"></i> Agregar Incubadora
+          <i class="fas fa-plus"></i> Add Incubator
         </button>
       </form>
     </div>
