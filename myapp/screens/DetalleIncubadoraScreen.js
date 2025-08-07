@@ -120,7 +120,7 @@ export default function DetalleIncubadora({ route, navigation }) {
             try {
               const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
               if (res.data.success) {
-                Alert.alert('Éxito', 'Incubator turned off');
+                Alert.alert('Successful', 'Incubator turned off');
                 await cargarDatosIncubadora();
               }
             } catch (error) {
@@ -143,7 +143,7 @@ export default function DetalleIncubadora({ route, navigation }) {
                 setTimeout(async () => {
                   const res = await axios.post(`${API_BASE_URL}/api/incubadora/${codigoIncubadora}/apagar`);
                   if (res.data.success) {
-                    Alert.alert('Éxito', 'File downloaded and incubator turned off');
+                    Alert.alert('Successful', 'File downloaded and incubator turned off');
                     await cargarDatosIncubadora();
                   }
                 }, 2000);

@@ -47,7 +47,7 @@ export default function AgregarIncubadora({ navigation, route }) {
       });
 
       if (response.data.success) {
-        Alert.alert('Éxito', 'Incubator added successfully', [
+        Alert.alert('Successful', 'Incubator added successfully', [
           { 
             text: 'OK', 
             onPress: () => navigation.navigate('Incubadoras', { userId }) 

@@ -113,7 +113,7 @@ export default function LoginScreen({ navigation }) {
             {mensaje ? (
               <Text style={[
                 styles.messageText,
-                mensaje.includes('éxito') ? styles.successMessage : styles.errorMessage
+                mensaje.includes('Successful') ? styles.successMessage : styles.errorMessage
               ]}>
                 {mensaje}
               </Text>

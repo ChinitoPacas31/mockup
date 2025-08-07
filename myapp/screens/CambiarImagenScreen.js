@@ -97,7 +97,7 @@ export default function CambiarImagenScreen({ route, navigation }) {
 
       const data = await res.json();
       if (data.success) {
-        Alert.alert('Éxito', 'Image updated correctly');
+        Alert.alert('Successful', 'Image updated correctly');
         setPerfil(prev => ({ ...prev, imagen_perfil: data.imagen_perfil }));
         setImagen(null);
       } else {

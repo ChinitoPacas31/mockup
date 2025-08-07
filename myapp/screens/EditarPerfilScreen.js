@@ -71,7 +71,7 @@ export default function EditarPerfilScreen({ route, navigation }) {
       });
       const data = await res.json();
       if (data.success) {
-        Alert.alert('Éxito', 'Profile successfully updated', [
+        Alert.alert('Successful', 'Profile successfully updated', [
           {
             text: 'OK',
             onPress: () => navigation.goBack(),

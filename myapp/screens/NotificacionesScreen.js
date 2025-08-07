@@ -74,7 +74,7 @@ export default function NotificacionesScreen({ route, navigation }) {
       const data = await res.json();
       if (data.success) {
         cargarNotificaciones();
-        Alert.alert('Éxito', 'All notifications marked as read');
+        Alert.alert('Successful', 'All notifications marked as read');
       }
     } catch (error) {
       console.log('Error marking all as read:', error);
@@ -97,7 +97,7 @@ export default function NotificacionesScreen({ route, navigation }) {
       const data = await res.json();
       if (data.success) {
         cargarNotificaciones();
-        Alert.alert('Éxito', 'Notification deleted');
+        Alert.alert('Successful', 'Notification deleted');
       }
     } catch (error) {
       console.log('Error deleting notification:', error);
@@ -128,7 +128,7 @@ export default function NotificacionesScreen({ route, navigation }) {
               const data = await res.json();
               if (data.success) {
                 cargarNotificaciones();
-                Alert.alert('Éxito', 'All notifications have been deleted.');
+                Alert.alert('Successful', 'All notifications have been deleted.');
               }
             } catch (error) {
               console.log('Error deleting all notifications:', error);
